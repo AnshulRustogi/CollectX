@@ -1,0 +1,5 @@
+requests
+flask
+oauthlib
+pyOpenSSL
+flask-login
