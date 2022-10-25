@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>CollectX</title>
+        <title>CollectX - Profile</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     
@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/profile.css') }}">
     <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
 
     </head>
@@ -32,7 +33,7 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ml-auto">
                     <div class="hori-selector"><div class="left"></div><div class="right"></div></div>
-                    <li class="nav-item active">
+                    <li class="nav-item">
                         <a class="nav-link" id = "dashboard" href="{{ url_for('index') }}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
                     </li>
                     <!--If user is logged in and is M then show Details in the navbar-->
@@ -47,11 +48,11 @@
                             <li class="nav-item">
                                 <a class="nav-link" id = "worker_update" href="{{ url_for('worker_update') }}"><i class="far fa-address-book"></i>Worker Details</a>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item active">
                                 <a class="nav-link" id = "self_profile" href="{{ url_for('profile') }}"><i class="far fa-address-book"></i>Profile</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('logout') }}"><i class="fa fa-sign-out"></i>Logout</a>
+                                <a class="nav-link" href="{{ 'logout' }}"><i class="fa fa-sign-out"></i>Logout</a>
                                 
                             </li>
                         {% endif %}
@@ -68,18 +69,56 @@
         </nav>
     <!-- Navbar -->
 
-    <!-- Content -->
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <h1>CollectX</h1>
-                <p>CollectX is a web application that helps you to manage your waste collection business. It helps you to manage your workers, routes and other details.</p>
-            </div>
-        </div>
-
-        <!--Show the current active pane from navbar-->
+    <!-- Content -->    
         
-    
+    <div class="container">
+        <h1>Personel Information</h1> 
+        
+        <!--Increase font size on text below-->
+
+        <div class="row">
+          <div class="column">
+            <img src="{{user.photo}}" style="width:100%" class="rounded-circle">
+          </div>
+          <div class="column">
+            
+            <form action="{{ url_for('profile') }}" method="POST">
+                <h1>
+                    <label for="fname">Full Name</label>
+                </h1>
+                <h4>
+                    <input type="text" id="fname" name="fullname" value="{{ user.user.name }}">
+                </h4>
+                <h1>
+                    <label for="subject">Phone Number</label>
+                </h1>
+                <h4>
+                    <input type="tel" id="phone" name="phone" pattern="[0-9]{10}"value="{{ user.user.phone}}">
+                </h4>
+                <h1>
+                    <label for="subject">Email</label>
+                </h1>
+                <h4>
+                    <input type="text" id="email" name="email" value="{{ user.user.email}}" disabled>
+                </h4>
+                <h1>
+                    <label for="subject">Role</label>
+                </h1>
+                <h4>
+                    {% if user.user.role == "M" %}
+                        <input type="text" id="role" name="role" value="Manager" disabled>
+                    {% else %}
+                        <input type="text" id="role" name="role" value="Worker" disabled>
+                    {% endif %}
+                </h4>
+                
+                
+                <center><input type="submit" value="Update"></center>
+            </form>
+          </div>
+        </div>
+      </div>
+
 
     </body>
 

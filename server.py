@@ -17,6 +17,7 @@ class User:
             self.user = Worker(db, email)
         elif Person.get_role(db, email) == 'M':
             self.user = Manager(db, email)
+        self.photo = session["photo"]
 
         #super().__init__(email)
         
@@ -34,6 +35,8 @@ class User:
         return False
     def get_id(self):
         return str(self.user.email)
+    def get_role(self):
+        return self.user.role
 
 app = Flask("CollectX")  #naming our application
 app.secret_key = "SDL-CollectX"  #it is necessary to set a password when dealing with OAuth 2.0
@@ -55,7 +58,6 @@ login_manager.init_app(app)  #we are initializing our login manager
 @login_manager.user_loader  #this is a decorator that will help us to load the user
 def load_user(email_id):
     return User(email_id)
-
 
 @app.route("/login")  #the page where the user can login
 def login():
@@ -87,15 +89,17 @@ def callback():
 
     session["google_id"] = id_info.get("sub")  #defing the results to show on the page
     session["email"] = id_info.get("email")
+    session["photo"] = id_info.get("picture")
     login_user(User(session["email"]))
     return redirect("/")  #the final page where the authorized users will end up
 
 
-@app.route("/")  #the home page where the login button will be located
+@app.route("/index")  #the home page where the login button will be located
 def index():
-    #if current_user.is_authenticated:
-    #    return redirect('/protected_area')
-    #Render index.html
+    return render_template("index.html", user=current_user)
+
+@app.route("/")  #the home page where the login button will be located
+def home_page():
     return render_template("index.html", user=current_user)
 
 @app.route("/protected_area")  #the page where only the authorized users can go to
@@ -103,10 +107,36 @@ def index():
 def protected_area():
     return f"Hello {session['name']}! <br/> <a href='/logout'><button>Logout</button></a>"  #the logout button 
 
-@app.route("/profile")
+@app.route("/profile", methods=['GET', 'POST'])
 @login_required
 def profile():
-    return f"Hello {current_user.name}! <br/> <a href='/logout'><button>Logout</button></a>"
+    if request.method == 'POST':
+        print("POST request received")
+        print(request.form)
+        newName = request.form['fullname']
+        newPhone = request.form['phone']
+        current_user.user.update_details(newName, newPhone)
+        return redirect('/profile')
+    return render_template("profile.html", user=current_user)
+
+@app.route("/worker_update", methods=['GET', 'POST'])
+@login_required
+def worker_update():
+    if current_user.user.role =="M":
+        if request.method == 'POST':
+            w_email = request.form['worker_email']
+            request_type = request.form['action_type']
+            #current_user.user.update_worker(newEmail, newName, newPhone, newRole, newPass)
+            current_user.user.update_worker(w_email, request_type)
+            return redirect('/worker_update')
+        raised_by_user = current_user.user.pending_request_raised_by_self()
+        raised_by_other = current_user.user.pending_request_raised_by_others()
+        return render_template("worker_change.html", user=current_user, 
+            details=current_user.user.get_all_userdetails(),
+            raised_by_user=raised_by_user,
+            raised_by_other=raised_by_other)
+    else:   
+        return redirect('/index')
 
 @app.route("/logout")
 @login_required

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>CollectX</title>
+        <title>CollectX - Profile</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     
@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/profile.css') }}">
     <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
 
     </head>
@@ -32,7 +33,7 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ml-auto">
                     <div class="hori-selector"><div class="left"></div><div class="right"></div></div>
-                    <li class="nav-item active">
+                    <li class="nav-item">
                         <a class="nav-link" id = "dashboard" href="{{ url_for('index') }}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
                     </li>
                     <!--If user is logged in and is M then show Details in the navbar-->
@@ -44,14 +45,14 @@
                             <!--<li class="nav-item">
                                 <a class="nav-link" id = "worker_details" href="javascript:void(0);"><i class="far fa-address-book"></i>Worker Details</a>
                             </li>-->
-                            <li class="nav-item">
-                                <a class="nav-link" id = "worker_update" href="{{ url_for('worker_update') }}"><i class="far fa-address-book"></i>Worker Details</a>
-                            </li>
-                            <li class="nav-item">
+                            <li class="nav-item active">
+                              <a class="nav-link" id = "worker_update" href="{{ url_for('worker_update') }}"><i class="far fa-address-book"></i>Worker Details</a>
+                          </li>
+                            <li class="nav-item ">
                                 <a class="nav-link" id = "self_profile" href="{{ url_for('profile') }}"><i class="far fa-address-book"></i>Profile</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('logout') }}"><i class="fa fa-sign-out"></i>Logout</a>
+                                <a class="nav-link" href="{{ 'logout' }}"><i class="fa fa-sign-out"></i>Logout</a>
                                 
                             </li>
                         {% endif %}
@@ -68,17 +69,88 @@
         </nav>
     <!-- Navbar -->
 
-    <!-- Content -->
+    <!-- Content -->    
+    
     <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <h1>CollectX</h1>
-                <p>CollectX is a web application that helps you to manage your waste collection business. It helps you to manage your workers, routes and other details.</p>
-            </div>
-        </div>
-
-        <!--Show the current active pane from navbar-->
-        
+        <h2>Details of all workers and managers</h2>
+        <br>
+        <h4>Pending Requests</h4>
+        <table class="table table-condensed table-hover">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for worker in raised_by_other %}
+            <tr>
+              <form action="worker_update" method="POST">
+                <td>{{worker[1]}}</td>
+                <input type="hidden" name="worker_email" value="{{worker[1]}}">
+                  {% if worker[2] == 'a' %}
+                    <td>
+                      <input type="hidden" name="action_type" value="add">
+                      <input type="submit" class="btn btn-danger btn-primary float-center" value="Add">
+                    </td>
+                  {% else %}
+                    <td>
+                      <input type="hidden" name="action_type" value="remove">
+                      <input type="submit" class="btn btn-danger btn-primary float-center" value="Remove">
+                    </td>
+                {% endif %}
+              </form>
+            </tr>
+            {% endfor %}
+            {% for worker in raised_by_user %}
+            <tr>
+              <form action="#" method="POST">
+                <td>{{worker[1]}}</td>
+                <input type="hidden" name="worker_email" value="{{worker[1]}}">
+                  {% if worker[2] == 'a' %}
+                    <td>
+                      <input type="hidden" name="action_type" value="add">
+                      <input type="submit" class="btn btn-danger btn-primary float-center disabled" value="Add">
+                    </td>
+                  {% else %}
+                    <td>
+                      <input type="hidden" name="action_type" value="remove">
+                      <input type="submit" class="btn btn-danger btn-primary float-center disabled" value="Remove">
+                    </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+            
+          </tbody>
+        </table>
+        <h4>Current Members</h4>
+        <table class="table table-condensed table-hover">
+          <thead>
+            <tr>
+              <th>Firstname</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for worker in raised_by_user %}
+            <tr>
+              <form action="worker_update" method="POST">
+                <input type="hidden" name="worker_email" value="{{worker[1]}}">
+                <td>{{worker[0]}}</td>
+                <td>{{worker[1]}}</td>
+                <td>{{worker[2]}}</td>
+                <input type="hidden" name="worker_email" value="{{worker[1]}}">
+                <td>
+                  <input type="hidden" name="action_type" value="remove">
+                  <input type="submit" class="btn btn-danger btn-primary float-center" value="Remove">
+                </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     
 
     </body>

@@ -39,6 +39,11 @@ class Person:
     #Check if person exists
     def exists(self):
         return self.db.check_person(self.email)
+    
+    def update_information(self, name, phone):
+        self.db.update_details(self.email, name, phone)
+        self.get_information()
+        return
 
 class Worker(Person):
     def __init__(self, db, email):
@@ -60,10 +65,10 @@ class Worker(Person):
             print('Start time cannot be before 6am')
             return False
         #Check if end time is after 10pm
-        if end_time.hour > 14:
+        if end_time.hour > 12:
             print('End time cannot be after 2pm')
             return True
-        
+
         #Format start_time and end_time to string
         date = date.strftime('%Y-%m-%d')
         start_time = start_time.strftime('%H:%M:%S')
@@ -113,11 +118,6 @@ class Worker(Person):
         return True
 
 
-    def ask_details(self):
-        name = input('Enter name: ')
-        phone = int(input('Enter phone number: '))
-        self.update_details(name, phone)
-
     def update_details(self, name: str, phone: int):
         self.db.update_details(self.email, name, phone)
         self.get_information()
@@ -130,13 +130,14 @@ class Manager(Person):
         if self.name == None:
             self.ask_details()
 
-    def ask_details(self):
-        name = input('Enter name: ')
-        phone = int(input('Enter phone number: '))
-        self.update_details(name, phone)
+    def get_all_userdetails(self):
+        return self.db.get_information_all_workers().values()
+    
+    def pending_request_raised_by_self(self):
+        return self.db.get_pending_request_by_mgr(self.email)
+    
+    def pending_request_raised_by_others(self):
+        return self.db.get_pending_request_not_by_mgr(self.email)
 
-    def update_details(self, name: str, phone: int):
-        self.db.update_details(self.email, name, phone)
-        self.get_information()
-
-        
+    def update_worker(self, w_email, request_type):
+        return self.db.add_remove_worker(self.email, "", w_email, 0, "w", True if request_type == "add" else False)

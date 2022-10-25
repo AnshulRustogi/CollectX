@@ -115,7 +115,7 @@ class Database:
                 self.cursor.execute("SELECT * FROM worker_update_request WHERE valid=1 AND EmailID = %s", (w_email,))
                 if self.cursor.fetchone():
                     #If a entry in table exists then check if mrg_id1 is not the same as mgr_email
-                    self.cursor.execute("SELECT * FROM worker_update_request WHERE valid=1 AND EmailID = %s AND approved_by_mg1 = %s", (w_email, mgr_email))
+                    self.cursor.execute("SELECT * FROM worker_update_request WHERE valid=1 AND EmailID = %s AND approved_by_mg1 = %s AND request_type='a'", (w_email, mgr_email))
                     if self.cursor.fetchone():
                         print("Request already raised for this worker by this manager")
                         return False
@@ -141,7 +141,7 @@ class Database:
                     return False
                 self.cursor.execute("SELECT * FROM worker_update_request WHERE valid=1 AND EmailID = %s", (w_email,))
                 if self.cursor.fetchone():
-                    self.cursor.execute("SELECT * FROM worker_update_request WHERE valid=1 AND EmailID = %s AND approved_by_mg1 = %s", (w_email, mgr_email))
+                    self.cursor.execute("SELECT * FROM worker_update_request WHERE valid=1 AND EmailID = %s AND approved_by_mg1 = %s  AND request_type='r'", (w_email, mgr_email))
                     if self.cursor.fetchone():
                         print("Request already raised for this worker by this manager")
                         return False
@@ -273,7 +273,7 @@ class Database:
         #Putting details into dictionary
         details_dict = {}
         for i in details:
-            details_dict[i[0]] = i[1]
+            details_dict[i[0]] = i
         return details_dict
 
     def get_information_all_managers(self):
@@ -382,7 +382,7 @@ class Database:
     #Update details in Person table
     def update_details(self, email: str, name: str, phone: str) -> bool:
         try:
-            self.cursor.execute("UPDATE Person SET Name = %s, Phone = %s WHERE EmailID = %s", (name, phone, email))
+            self.cursor.execute("UPDATE Person SET Name = %s, Phone_number = %s WHERE EmailID = %s", (name, phone, email))
             self.cnx.commit()
             return True
         except Exception as e:
@@ -405,6 +405,24 @@ class Database:
         details_list = []
         for i in details:
             details_list.append(i[1:5])
+        return details_list
+
+    #Get all pending request in worker_update_request
+    def get_pending_request_by_mgr(self, mgr_email: str) -> list:
+        self.cursor.execute("SELECT * FROM worker_update_request WHERE valid = 1 AND (approved_by_mg1=%s OR approved_by_mg2 = %s)", (mgr_email,mgr_email,))
+        details = self.cursor.fetchall()
+        details_list = []
+        for i in details:
+            details_list.append(i)
+        return details_list
+    
+    #Get all pending request in worker_update_request not raised by current mgr_email
+    def get_pending_request_not_by_mgr(self, mgr_email: str) -> list:
+        self.cursor.execute("SELECT * FROM worker_update_request WHERE valid = 1 AND (approved_by_mg1!=%s AND approved_by_mg2 != %s)", (mgr_email,mgr_email,))
+        details = self.cursor.fetchall()
+        details_list = []
+        for i in details:
+            details_list.append(i)
         return details_list
 
     #Get all valid overtime requests and whose date is after now present in recieve_overtime table
