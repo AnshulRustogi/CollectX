@@ -30,7 +30,7 @@ class Person:
             print('Person does not exist')
             sys.exit(1)
         #Get person's name
-        self.name = self.db.get_name(self.email)
+        self.name = self.db.get_name(self.email).lower()
         #Get person's phone number
         self.phone = self.db.get_phone(self.email)
         #Get person's address
@@ -140,4 +140,4 @@ class Manager(Person):
         return self.db.get_pending_request_not_by_mgr(self.email)
 
     def update_worker(self, w_email, request_type):
-        return self.db.add_remove_worker(self.email, "", w_email, 0, "w", True if request_type == "add" else False)
+        return self.db.add_remove_worker(self.email, "Worker Name", w_email, 0, "w", True if request_type == "add" else False)

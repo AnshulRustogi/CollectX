@@ -110,7 +110,7 @@
                   {% if worker[2] == 'a' %}
                     <td>
                       <input type="hidden" name="action_type" value="add">
-                      <input type="submit" class="btn btn-danger btn-primary float-center disabled" value="Add">
+                      <input type="submit" class="btn btn-primary float-center disabled" value="Add">
                     </td>
                   {% else %}
                     <td>
@@ -118,8 +118,19 @@
                       <input type="submit" class="btn btn-danger btn-primary float-center disabled" value="Remove">
                     </td>
                 {% endif %}
+              </form>
             </tr>
             {% endfor %}
+            <tr>
+              <form action="worker_update" method="POST">
+                <td><input type="email" name="worker_email" placeholder="Please enter worker email">
+                </td>
+                  <td>
+                    <input type="hidden" name="action_type" value="add">
+                    <input type="submit" class="btn btn-primary float-center" value="Add">
+                  </td>
+              </form>
+            </tr>
             
           </tbody>
         </table>
@@ -134,10 +145,9 @@
             </tr>
           </thead>
           <tbody>
-            {% for worker in raised_by_user %}
+            {% for worker in details %}
             <tr>
               <form action="worker_update" method="POST">
-                <input type="hidden" name="worker_email" value="{{worker[1]}}">
                 <td>{{worker[0]}}</td>
                 <td>{{worker[1]}}</td>
                 <td>{{worker[2]}}</td>
@@ -146,6 +156,7 @@
                   <input type="hidden" name="action_type" value="remove">
                   <input type="submit" class="btn btn-danger btn-primary float-center" value="Remove">
                 </td>
+              </form>
             </tr>
             {% endfor %}
           </tbody>

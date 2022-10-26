@@ -13,12 +13,9 @@ class Database:
         try:
             self.cnx = mysql.connector.connect(user='root', password='password',
                                           host='localhost', database='collectx')
-            print("Connected to local mysql server")
-
             if not self.cnx.is_connected():
                 print("Not connected to database")
                 sys.exit(1)
-            print("Connected to database")
             self.cursor = self.cnx.cursor()
             #Check if all the tables exist
             self.tables = ["Person", "MCD", "Timesheet", "worker_update_request", "recieve_overtime", "overtime_accepted", "BaseDisplay", "Bins", "Route","EdgeBetween2Bin"]
@@ -199,13 +196,20 @@ class Database:
         if self.cursor.fetchone():
             return True
         return False
+    
     #Check if person exist in person table
     def check_person(self, email: str) -> bool:
         self.cursor.execute("SELECT * FROM Person WHERE EmailID = %s", (email,))
-        if self.cursor.fetchone():
+        #Print the output of above query
+        #print(self.cursor.fetchone())
+
+        try:
+            len(self.cursor.fetchone())
             return True
-        return False
-    #Create overtime request
+        except:
+            return False
+   
+   #Create overtime request
     def create_overtime_request(self, date: str, start_time: str, end_time: str, number_of_required_worker: str) -> bool:
         #Check if the request is already present in overtime_request table
         self.cursor.execute("SELECT * FROM overtime_request WHERE Date = %s AND start_time = %s AND end_time = %s", (date, start_time, end_time))
@@ -368,10 +372,13 @@ class Database:
         return details[0][0]
 
     #Get person role for email from Person table
-    def get_role(self, email: str) -> str:
+    def get_role(self, email: str):
         self.cursor.execute("SELECT * FROM Person WHERE EmailID = %s", (email,))
         details = self.cursor.fetchall()
-        return details[0][3]
+        try:    
+            return details[0][3]
+        except:
+            return None
 
     #Get person phone number for email from Person table
     def get_phone(self, email: str) -> str:

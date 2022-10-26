@@ -54,6 +54,13 @@
                                 <a class="nav-link" href="{{ url_for('logout') }}"><i class="fa fa-sign-out"></i>Logout</a>
                                 
                             </li>
+                        {% else %}
+                        Timesheet
+                        Routes
+                        <li class="nav-item">
+                            <a class="nav-link" id = "self_profile" href="{{ url_for('profile') }}"><i class="far fa-address-book"></i>Profile</a>
+                        </li>
+                            
                         {% endif %}
                     {% else %}
                             <li class="nav-item">
@@ -67,7 +74,12 @@
             </div>
         </nav>
     <!-- Navbar -->
-
+    <!--If alert is not None raise the alert-->
+    {% if alert %}
+    <script>
+    alert("{{ alert_message }}");
+    </script>
+    {% endif %}
     <!-- Content -->
     <div class="container">
         <div class="row">
@@ -76,6 +88,7 @@
                 <p>CollectX is a web application that helps you to manage your waste collection business. It helps you to manage your workers, routes and other details.</p>
             </div>
         </div>
+        <div class="flourish-embed flourish-network" data-src="visualisation/11579678"><script src="https://public.flourish.studio/resources/embed.js"></script></div>
 
         <!--Show the current active pane from navbar-->
         

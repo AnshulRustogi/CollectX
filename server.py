@@ -10,6 +10,8 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from worker import Worker, Manager, Person
 from db import Database
 db = Database()
+alert = None
+alert_message = None
 class User:
     
     def __init__(self, email):
@@ -17,6 +19,8 @@ class User:
             self.user = Worker(db, email)
         elif Person.get_role(db, email) == 'M':
             self.user = Manager(db, email)
+        #else:
+        #    self.user = None
         self.photo = session["photo"]
 
         #super().__init__(email)
@@ -63,9 +67,11 @@ def load_user(email_id):
 def login():
     #If user is already logged in, redirect to home page
     if current_user.is_authenticated:
-        return redirect('/logged_in')
+        print("Voila")
+        return redirect('/index')
     authorization_url, state = flow.authorization_url()  #asking the flow class for the authorization (login) url
     session["state"] = state
+    
     return redirect(authorization_url)
 
 
@@ -86,21 +92,37 @@ def callback():
         request=token_request,
         audience=GOOGLE_CLIENT_ID
     )
-
+    
     session["google_id"] = id_info.get("sub")  #defing the results to show on the page
     session["email"] = id_info.get("email")
     session["photo"] = id_info.get("picture")
+    db = Database()
+    print("Email: " + id_info["email"])
+    print("Exists: " + str(db.check_person(id_info["email"])))
+    if not db.check_person(id_info["email"]):
+        global alert_message, alert
+        logout_user()
+        session.clear()
+        alert_message = "You are not authorized to use this application"
+        alert = True
+        return redirect("/index")
+    alert = False
+
     login_user(User(session["email"]))
     return redirect("/")  #the final page where the authorized users will end up
 
 
 @app.route("/index")  #the home page where the login button will be located
 def index():
-    return render_template("index.html", user=current_user)
+    global alert, alert_message
+    s = render_template("index.html", user=current_user, alert=alert, alert_message=alert_message)
+    alert = False
+    alert_message = ""
+    return s
 
 @app.route("/")  #the home page where the login button will be located
 def home_page():
-    return render_template("index.html", user=current_user)
+    return render_template("index.html", user=current_user, alert=alert, alert_message=alert_message)
 
 @app.route("/protected_area")  #the page where only the authorized users can go to
 @login_required
