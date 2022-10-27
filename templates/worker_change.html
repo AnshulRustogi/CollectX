@@ -26,47 +26,54 @@
     <body>
         <!-- Navbar -->
         <nav class="navbar navbar-expand-custom navbar-mainbg">
-            <p class="navbar-brand navbar-logo" href="#"><h1>CollectX</h1></p>
-            <button class="navbar-toggler" type="button" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <i class="fas fa-bars text-white"></i>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav ml-auto">
-                    <div class="hori-selector"><div class="left"></div><div class="right"></div></div>
-                    <li class="nav-item">
-                        <a class="nav-link" id = "dashboard" href="{{ url_for('index') }}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
-                    </li>
-                    <!--If user is logged in and is M then show Details in the navbar-->
-                    {% if user.is_authenticated %}
-                        {% if user.get_role() == 'M' %}
-                            <li class="nav-item">
-                                <a class="nav-link" id = "route" href="javascript:void(0);"><i class="fa fa-truck"></i>Route Planning</a>
-                            </li>
-                            <!--<li class="nav-item">
-                                <a class="nav-link" id = "worker_details" href="javascript:void(0);"><i class="far fa-address-book"></i>Worker Details</a>
-                            </li>-->
-                            <li class="nav-item active">
+          <p class="navbar-brand navbar-logo" href="#"><h1>CollectX</h1></p>
+          <button class="navbar-toggler" type="button" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="fas fa-bars text-white"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ml-auto">
+                  <div class="hori-selector"><div class="left"></div><div class="right"></div></div>
+                  <li class="nav-item">
+                      <a class="nav-link" id = "dashboard" href="{{ url_for('index') }}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+                  </li>
+                  <!--If user is logged in and is M then show Details in the navbar-->
+                  {% if user.is_authenticated %}
+                      {% if user.get_role() == 'M' %}
+                          <li class="nav-item">
+                              <a class="nav-link" id = "route" href="{{ url_for('route_planning')}}"><i class="fa fa-truck"></i>Route Planning</a>
+                          </li>
+                          <!--<li class="nav-item">
+                              <a class="nav-link" id = "worker_details" href="javascript:void(0);"><i class="far fa-address-book"></i>Worker Details</a>
+                          </li>-->
+                          <li class="nav-item active">
                               <a class="nav-link" id = "worker_update" href="{{ url_for('worker_update') }}"><i class="far fa-address-book"></i>Worker Details</a>
                           </li>
-                            <li class="nav-item ">
-                                <a class="nav-link" id = "self_profile" href="{{ url_for('profile') }}"><i class="far fa-address-book"></i>Profile</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ 'logout' }}"><i class="fa fa-sign-out"></i>Logout</a>
-                                
-                            </li>
-                        {% endif %}
-                    {% else %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('login') }}" role="button" style="text-transform:none">
-                                    <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
-                                    Login
-                                  </a>    
-                            </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </nav>
+                      {% else %}
+                          <li class="nav-item">
+                              <a class="nav-link" id = "worker_update" href="{{ url_for('worker_timesheet') }}"><i class="far fa-address-book"></i>Timesheet</a>
+                          </li>
+                          <li class="nav-item">
+                              <a class="nav-link" id = "self_profile" href="#"><i class="far fa-address-book"></i>Assigned Routes</a>
+                          </li> 
+                      {% endif %}
+                      <li class="nav-item">
+                          <a class="nav-link" id = "self_profile" href="{{ url_for('profile') }}"><i class="far fa-address-book"></i>Profile</a>
+                      </li> 
+                      <li class="nav-item">
+                          <a class="nav-link" href="{{ url_for('logout') }}"><i class="fa fa-sign-out"></i>Logout</a>
+                          
+                      </li>
+                  {% else %}
+                          <li class="nav-item">
+                              <a class="nav-link" href="{{ url_for('login') }}" role="button" style="text-transform:none">
+                                  <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
+                                  Login
+                                </a>    
+                          </li>
+                  {% endif %}
+              </ul>
+          </div>
+      </nav>
     <!-- Navbar -->
 
     <!-- Content -->    
@@ -91,12 +98,12 @@
                   {% if worker[2] == 'a' %}
                     <td>
                       <input type="hidden" name="action_type" value="add">
-                      <input type="submit" class="btn btn-danger btn-primary float-center" value="Add">
+                      <input type="submit" class="btn float-center" value="Add">
                     </td>
                   {% else %}
                     <td>
                       <input type="hidden" name="action_type" value="remove">
-                      <input type="submit" class="btn btn-danger btn-primary float-center" value="Remove">
+                      <input type="submit" class="btn float-center" value="Remove">
                     </td>
                 {% endif %}
               </form>
@@ -104,18 +111,18 @@
             {% endfor %}
             {% for worker in raised_by_user %}
             <tr>
-              <form action="#" method="POST">
+              <form>
                 <td>{{worker[1]}}</td>
                 <input type="hidden" name="worker_email" value="{{worker[1]}}">
                   {% if worker[2] == 'a' %}
                     <td>
                       <input type="hidden" name="action_type" value="add">
-                      <input type="submit" class="btn btn-primary float-center disabled" value="Add">
+                      <input type="submit" class="btn float-center disabled" value="Add">
                     </td>
                   {% else %}
                     <td>
                       <input type="hidden" name="action_type" value="remove">
-                      <input type="submit" class="btn btn-danger btn-primary float-center disabled" value="Remove">
+                      <input type="submit" class="btn float-center disabled" value="Remove">
                     </td>
                 {% endif %}
               </form>
@@ -123,11 +130,11 @@
             {% endfor %}
             <tr>
               <form action="worker_update" method="POST">
-                <td><input type="email" name="worker_email" placeholder="Please enter worker email">
+                <td><input type="email" name="worker_email" placeholder="Please enter worker email" required>
                 </td>
                   <td>
                     <input type="hidden" name="action_type" value="add">
-                    <input type="submit" class="btn btn-primary float-center" value="Add">
+                    <input type="submit" class="btn float-center" value="Add">
                   </td>
               </form>
             </tr>
@@ -153,8 +160,7 @@
                 <td>{{worker[2]}}</td>
                 <input type="hidden" name="worker_email" value="{{worker[1]}}">
                 <td>
-                  <input type="hidden" name="action_type" value="remove">
-                  <input type="submit" class="btn btn-danger btn-primary float-center" value="Remove">
+                  <input type="submit" name="action_type" class="btn btn-danger float-center" value="Remove">
                 </td>
               </form>
             </tr>
@@ -163,7 +169,11 @@
         </table>
       </div>
     
-
+      {% if alert %}
+      <script>
+      alert("{{ alert_message }}");
+      </script>
+      {% endif %}
     </body>
 
 </html>

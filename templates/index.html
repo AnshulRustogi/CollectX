@@ -39,7 +39,7 @@
                     {% if user.is_authenticated %}
                         {% if user.get_role() == 'M' %}
                             <li class="nav-item">
-                                <a class="nav-link" id = "route" href="javascript:void(0);"><i class="fa fa-truck"></i>Route Planning</a>
+                                <a class="nav-link" id = "route" href="{{ url_for('route_planning')}}"><i class="fa fa-truck"></i>Route Planning</a>
                             </li>
                             <!--<li class="nav-item">
                                 <a class="nav-link" id = "worker_details" href="javascript:void(0);"><i class="far fa-address-book"></i>Worker Details</a>
@@ -47,21 +47,21 @@
                             <li class="nav-item">
                                 <a class="nav-link" id = "worker_update" href="{{ url_for('worker_update') }}"><i class="far fa-address-book"></i>Worker Details</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id = "self_profile" href="{{ url_for('profile') }}"><i class="far fa-address-book"></i>Profile</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('logout') }}"><i class="fa fa-sign-out"></i>Logout</a>
-                                
-                            </li>
                         {% else %}
-                        Timesheet
-                        Routes
+                        <li class="nav-item">
+                                <a class="nav-link" id = "worker_update" href="{{ url_for('worker_timesheet') }}"><i class="far fa-address-book"></i>Timesheet</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id = "self_profile" href="#"><i class="far fa-address-book"></i>Assigned Routes</a>
+                            </li> 
+                        {% endif %}
                         <li class="nav-item">
                             <a class="nav-link" id = "self_profile" href="{{ url_for('profile') }}"><i class="far fa-address-book"></i>Profile</a>
-                        </li>
+                        </li> 
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}"><i class="fa fa-sign-out"></i>Logout</a>
                             
-                        {% endif %}
+                        </li>
                     {% else %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('login') }}" role="button" style="text-transform:none">

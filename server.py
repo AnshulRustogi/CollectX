@@ -1,5 +1,6 @@
 import os
 import pathlib
+import re
 import requests
 from flask import Flask, session, abort, redirect, request, render_template
 from google.oauth2 import id_token
@@ -9,12 +10,14 @@ import google.auth.transport.requests
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from worker import Worker, Manager, Person
 from db import Database
-db = Database()
+import datetime
 alert = None
 alert_message = None
+
 class User:
     
     def __init__(self, email):
+        db = Database()
         if Person.get_role(db, email) == 'W':
             self.user = Worker(db, email)
         elif Person.get_role(db, email) == 'M':
@@ -65,9 +68,9 @@ def load_user(email_id):
 
 @app.route("/login")  #the page where the user can login
 def login():
+    global alert, alert_message
     #If user is already logged in, redirect to home page
     if current_user.is_authenticated:
-        print("Voila")
         return redirect('/index')
     authorization_url, state = flow.authorization_url()  #asking the flow class for the authorization (login) url
     session["state"] = state
@@ -77,6 +80,7 @@ def login():
 
 @app.route("/callback")  #this is the page that will handle the callback process meaning process after the authorization
 def callback():
+    global alert, alert_message
     flow.fetch_token(authorization_response=request.url)
 
     if not session["state"] == request.args["state"]:
@@ -115,57 +119,175 @@ def callback():
 @app.route("/index")  #the home page where the login button will be located
 def index():
     global alert, alert_message
-    s = render_template("index.html", user=current_user, alert=alert, alert_message=alert_message)
+    return render_template_with_alert("index.html", user=current_user)
+    
+def render_template_with_alert(template, **kwargs):
+    global alert, alert_message
+    try:
+        if current_user.user.db.error!=None and alert!=True:
+            print(current_user.user.db.error)
+            alert_message = current_user.user.db.error
+            alert = True
+    except:
+        pass
+    r = render_template(template, alert=alert, alert_message=alert_message, **kwargs)
     alert = False
-    alert_message = ""
-    return s
+    return r
 
 @app.route("/")  #the home page where the login button will be located
 def home_page():
-    return render_template("index.html", user=current_user, alert=alert, alert_message=alert_message)
+    return redirect("/index")
+
 
 @app.route("/profile", methods=['GET', 'POST'])
 @login_required
 def profile():
+    global alert, alert_message
     if request.method == 'POST':
         print("POST request received")
         #print(request.form)
         newName = request.form['fullname']
         newPhone = request.form['phone']
+        if newName == "" or len(str(newPhone))!=10:
+            print("Invalid input")
+            alert = True
+            alert_message = "Enter valid name and 10-digit phone number"
+            return redirect("/profile")
         current_user.user.update_details(newName, newPhone)
         return redirect('/profile')
-    return render_template("profile.html", user=current_user)
+    return render_template_with_alert("profile.html", user=current_user)
+
 
 @app.route("/worker_update", methods=['GET', 'POST'])
 @login_required
 def worker_update():
+    global alert_message, alert
     if current_user.user.role =="M":
         if request.method == 'POST':
-            w_email = request.form['worker_email']
+            w_email = request.form['worker_email'].lower()
             request_type = request.form['action_type']
-            #current_user.user.update_worker(newEmail, newName, newPhone, newRole, newPass)
+            #If w_email is not a email
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", w_email):
+                print("Invalid email")
+                
+                alert_message = "Invalid email"
+                alert = True
+                return redirect('/worker_update')
             current_user.user.update_worker(w_email, request_type)
+            alert = False
             return redirect('/worker_update')
         raised_by_user = current_user.user.pending_request_raised_by_self()
         raised_by_other = current_user.user.pending_request_raised_by_others()
-        return render_template("worker_change.html", user=current_user, 
+        return render_template_with_alert("worker_change.html", user=current_user, 
             details=current_user.user.get_all_userdetails(),
             raised_by_user=raised_by_user,
             raised_by_other=raised_by_other)
     else:   
+        alert = False
         return redirect('/index')
 
 @app.route("/logout")
 @login_required
 def logout():
+    global alert, alert_message
     logout_user()
     session.clear()
+    alert = False
     return redirect("/")
 
 @login_manager.unauthorized_handler
 def unauthorized_callback():
+    global alert, alert_message
+    alert = True
+    alert_message = "Kindly login with your registered email"
     return redirect('/')
 
+@app.route("/worker_timesheet", methods=['GET', 'POST'])
+@login_required
+def worker_timesheet():
+    global alert, alert_message
+    if current_user.user.role == "W":
+        today = datetime.datetime.today()
+        next_monday = today + datetime.timedelta(days=-today.weekday(), weeks=1)
+        #Create list of dates for next week and append the dates as string
+        dates = []
+        present = []
+        timesheet = current_user.user.get_timesheet()
+        dates_in_timesheet = [x[0].strftime("%d-%m-%Y") for x in timesheet]
+        for i in range(7):
+            dates.append((next_monday + datetime.timedelta(days=i)).strftime("%d-%m-%Y"))
+            if dates[i] in dates_in_timesheet:
+                present.append(True)
+            else:
+                present.append(False)
+        if request.method == 'POST':
+            print(dates_in_timesheet)
+            current_user.user.remove_timesheet(dates_in_timesheet)
+            print(current_user.user.get_timesheet())
+            newWorkingDates = request.form.getlist('working_dates')
+            current_user.user.update_timesheet(newWorkingDates)
+            return redirect('/worker_timesheet')
 
+        timesheet = current_user.user.get_timesheet()
+        dates_in_timesheet = [x[0].strftime("%d-%m-%Y") for x in timesheet]
+        present = []
+        for i in range(7):
+            if dates[i] in dates_in_timesheet:
+                present.append((dates[i], True))
+            else:
+                present.append((dates[i],False))
+        
+        #timesheet is a list of tuple of (date, start_time, end_time)
+        #timesheet = current_user.user.get_timesheet()
+        #print(timesheet)
+        #dates_in_timesheet = [x[0] for x in timesheet]
+        #present = []
+        #For all the dates check if that date is present in timesheet
+        #for date in dates:
+        #    if date in dates_in_timesheet:
+        #        present.append(True)
+        #    else:
+        #        present.append(False)
+
+        return render_template_with_alert("worker_timesheet.html", user=current_user,
+            dates=dates, is_working_week=present)
+    else:
+        return redirect('/index')
+
+@app.route("/route_planning", methods=['GET', 'POST'])
+@login_required
+def route_planning():
+    global alert, alert_message
+    #If the user is a manager
+    #Find all worker timesheet for next week
+    if current_user.user.role == "M":
+        today = datetime.datetime.today()
+        next_monday = today + datetime.timedelta(days=-today.weekday(), weeks=1)
+        #Create list of dates for next week and append the dates as string
+        dates = []
+        present = []
+        for i in range(7):
+            dates.append((next_monday + datetime.timedelta(days=i)).strftime("%d-%m-%Y"))
+        #Get all the workers
+        workers = current_user.user.get_all_userdetails()
+        #For each worker get the timesheet
+        workers_timesheet = []
+        #Create for loop overs keys in workers
+        for worker in workers:
+            worker = worker[1]
+            timesheet = Worker(Database(), worker).get_timesheet()
+            dates_in_timesheet = [x[0].strftime("%d-%m-%Y") for x in timesheet]
+            present = []
+            for i in range(7):
+                if dates[i] in dates_in_timesheet:
+                    present.append((dates[i], True))
+                else:
+                    present.append((dates[i],False))
+            workers_timesheet.append((worker, present))
+        #print(worker_timesheet)
+        #print(dates)
+        #print(worker_timesheet)
+        return render_template_with_alert("route_planning.html", user=current_user,
+            dates=dates, workers_timesheet=workers_timesheet)
 if __name__ == "__main__":  #and the final closing function
     app.run(debug=True)

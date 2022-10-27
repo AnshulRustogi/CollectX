@@ -46,12 +46,15 @@ class Database:
             print("Table does not exist")
             sys.exit(1)
 
-    def execute(self, query):
+    def execute(self, query, args=None):
         try:
-            self.cursor.execute(query)
+            if args is None:
+                self.cursor.execute(query)
+            else:
+                self.cursor.execute(query, args)
         except mysql.connector.Error as err:
+            self.error = err
             print(err)
-        return
 
     #Check if tables exists
     def check_table(self, table_name: list) -> bool:
@@ -119,7 +122,7 @@ class Database:
                 #Check if the worker is already present in Person table
                 self.execute("SELECT * FROM Person WHERE EmailID = %s", (w_email,))
                 if self.cursor.fetchone():
-                    self.error = "Worker already exists"
+                    self.error = "Worker/Manager already exists"
                     print("Worker already present in Person table")
                     return False
                 #Check if the worker is already present in worker_update_request table
@@ -193,8 +196,17 @@ class Database:
             self.error = None
             return True
 
+    def remove_timesheet(self, email: str, date: str, start_time: str, end_time: str) -> bool:
+        #Remove the timesheet of the worker
+        date = datetime.strptime(date, "%d-%m-%Y").strftime("%Y-%m-%d")
+        self.execute("DELETE FROM Timesheet WHERE EmailID = %s AND date = %s AND start_time = %s AND end_time = %s", (email, date, start_time, end_time))
+        self.cnx.commit()
+        self.error = None
+        return True
+
     #Add/Remove new worker in Timesheet table
-    def add_remove_timesheet(self, email: str, date: str, start_time: str, end_time: str) -> bool:
+    def add_timesheet(self, email: str, date: str, start_time: str, end_time: str) -> bool:
+        date = datetime.strptime(date, "%d-%m-%Y").strftime("%Y-%m-%d")
         #Check if the worker is already present in Timesheet table and if email id belongs to worker
         if not self.check_worker(email):
             self.error = "Worker does not exist"
@@ -205,7 +217,9 @@ class Database:
             self.error = "Time entered by worker is clashing with other entry"
             print("Time entered by worker is clashing with any other entry")
             return False
-
+        start_time = start_time + ":00"
+        end_time = end_time + ":00"
+        
         self.execute("INSERT INTO Timesheet VALUES(%s, %s, %s, %s)", (email, date, start_time, end_time))
         self.cnx.commit()
         self.error = None
@@ -250,11 +264,14 @@ class Database:
     
     #Check if some date, start_time, end_time for a worker is clashing with a already present entry in Timesheet table for that worker
     def check_timesheet_clash(self, email: str, date: str, start_time: str, end_time: str) -> bool:
+        #Change date format to "%d-%m-%y"
+        #date = datetime.strptime(date, "%d-%m-%Y").strftime("%Y-%m-%d")
         self.execute("SELECT * FROM Timesheet WHERE EmailID = %s AND Date = %s", (email, date))
+
         timesheet = self.cursor.fetchall()
         #convert start_time and end_time to datetime object
-        start_time = datetime.strptime(start_time, '%H:%M:%S').time()
-        end_time = datetime.strptime(end_time, '%H:%M:%S').time()
+        start_time = datetime.strptime(start_time, '%H:%M').time()
+        end_time = datetime.strptime(end_time, '%H:%M').time()
         for row in timesheet:
             #convert start_time and end_time of each row in Timesheet table to datetime object
             date1 = row[1]
@@ -267,6 +284,8 @@ class Database:
 
     #Recieve overtime request
     def recieve_overtime_request(self, overtime_id:int, w_email: str, date: str, new_start_time: str, new_end_time: str) -> bool:
+        #date = datetime.strptime(date, "%d-%m-%Y").strftime("%Y-%m-%d")
+        
         #First check if worker exists in Person table and it's role is W
         if not self.check_worker(w_email):
             self.error = "Worker does not exist"
@@ -288,6 +307,8 @@ class Database:
         self.execute("INSERT INTO overtime_accepted VALUES(%s, %s)", (overtime_id, w_email))
         self.cnx.commit()
         #Add the time to timesheet
+        new_start_time = new_start_time + ":00"
+        new_end_time = new_end_time + ":00"
         self.execute("INSERT INTO Timesheet VALUES(%s, %s, %s, %s)", (w_email, date, new_start_time, new_end_time))
         self.cnx.commit()
         #Increase accepted till now by 1
@@ -307,7 +328,7 @@ class Database:
         #Putting details into dictionary
         details_dict = {}
         for i in details:
-            details_dict[i[0]] = i
+            details_dict[i[1]] = i
         return details_dict
 
     def get_information_all_managers(self):
