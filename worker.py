@@ -132,7 +132,8 @@ class Manager(Person):
 
     def get_all_userdetails(self):
         return self.db.get_information_all_workers().values()
-    
+    def get_all_person(self):
+        return self.db.get_all_person()
     def pending_request_raised_by_self(self):
         return self.db.get_pending_request_by_mgr(self.email)
     

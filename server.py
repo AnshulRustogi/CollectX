@@ -124,17 +124,12 @@ def index():
 def home_page():
     return render_template("index.html", user=current_user, alert=alert, alert_message=alert_message)
 
-@app.route("/protected_area")  #the page where only the authorized users can go to
-@login_required
-def protected_area():
-    return f"Hello {session['name']}! <br/> <a href='/logout'><button>Logout</button></a>"  #the logout button 
-
 @app.route("/profile", methods=['GET', 'POST'])
 @login_required
 def profile():
     if request.method == 'POST':
         print("POST request received")
-        print(request.form)
+        #print(request.form)
         newName = request.form['fullname']
         newPhone = request.form['phone']
         current_user.user.update_details(newName, newPhone)
