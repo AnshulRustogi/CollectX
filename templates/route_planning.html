@@ -22,6 +22,11 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navbar.css') }}">
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
     
+    <script>
+        $(document).ready(function() {
+            $(":checkbox").on("click", false);
+        });
+    </script>
     </head>
     <body>
         <!-- Navbar -->
@@ -109,35 +114,30 @@
                                         <th scope="col">Sunday</th>
                                     </tr>
                                     <tr>
-                                        <th>Worker Email \ Day</td>
+                                        <th>Worker Email</td>
                                         {% for date in dates%}
                                         <th class="text-center">{{ date }}</td>
                                         {% endfor %}
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    
-                                    {% for worker, dates in workers_timesheet_morning %}
+                                    {% for (worker_name,worker_email), dates_morning, dates_afternoon in workers_timesheet %}
                                     <tr>
-                                        <td style="border-bottom: none;" colspan="8">{{ worker }}</td>
+                                        <td style="border-bottom: none;" colspan="8">{{ loop.index }}. Name: <b>{{ worker_name }}</b>, Email: <b>{{ worker_email }}</b></td>
                                     </tr>
                                     <tr>
-
-                                    </tr>
-                                        <td style="border-top: none;">Morning Shift:</td>
-                                        {% for day, working in dates %}
-                                        <td class="text-center">
-                                            <input type="checkbox" name="working" value="{{ day }}_morning" {% if working %} checked {% endif %} disabled>
+                                        <td>Morning Shift:</td>
+                                        {% for day, working in dates_morning %}
+                                        <td class="text-center" scope="col">
+                                            <input type="checkbox" name="working" value="{{ day }}_morning" {% if working %} checked {% endif %}>
                                         </td>
                                         {% endfor %}
                                     </tr>
-                                    {% endfor %}
-                                    {% for worker, dates in workers_timesheet_afternoon %}
                                     <tr>
-                                        <td>Afternoon Shift:</td>
-                                        {% for day, working in dates %}
-                                        <td class="text-center">
-                                            <input type="checkbox" name="working" value="{{ day }}_afternoon" {% if working %} checked {% endif %} disabled>
+                                        <td scope="col">Afternoon Shift:</td>
+                                        {% for day, working in dates_afternoon %}
+                                        <td class="text-center" scope="col">
+                                            <input type="checkbox" name="working" value="{{ day }}_afternoon" {% if working %} checked {% endif %}>
                                         </td>
                                         {% endfor %}
                                     </tr>
@@ -145,21 +145,32 @@
                                     <!--Insert gap between two rows-->
                                     <tr>
                                         <td colspan="8">&nbsp;</td>
+                                    </tr>
                                     <tr>
-                                        <td>Total Morning: </td>
+                                        <td scope="col">Total Morning: </td>
                                         {% for total_date in total_worker_morning %}
-                                        <td class="text-center" {% if total_date==0 %} style="color:black; background-color:red" {% endif %}>
+                                        <td scope="col" class="text-center" {% if total_date==0 %} style="color:black; background-color:red" {% endif %}>
                                             {% if total_date!=0 %} {{ total_date }} {% else %} NO WORKER PRESENT {% endif %}
                                         </td>
                                         {% endfor %}
                                     </tr>
                                     <tr>
-                                        <td>Total Afternoon: </td>
+                                        <td scope="col">Total Afternoon: </td>
                                         {% for total_date in total_worker_afternoon %}
-                                        <td class="text-center" {% if total_date==0 %} style="color:black; background-color:red" {% endif %}>
+                                        <td scope="col" class="text-center" {% if total_date==0 %} style="color:black; background-color:red" {% endif %}>
                                             {% if total_date!=0 %} {{ total_date }} {% else %} NO WORKER PRESENT {% endif %}
                                         </td>
                                         {% endfor %}
+                                    </tr>
+                                    <tr>
+                                        <td colspan="8" scope="col">
+                                            <button type="submit" class="btn btn-danger btn-block" disabled>Raise overtime request</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="8">
+                                            <button type="submit" class="btn btn-success btn-block" disabled>Generate Route for next week</button>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>

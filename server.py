@@ -293,24 +293,22 @@ def route_planning():
         next_monday = today + datetime.timedelta(days=-today.weekday(), weeks=1)
         #Create list of dates for next week and append the dates as string
         dates = []
-        present_morning = []
-        present_afternoon = []
         for i in range(7):
             dates.append((next_monday + datetime.timedelta(days=i)).strftime("%d-%m-%Y"))
         #Get all the workers
         workers = current_user.user.get_all_userdetails()
         #For each worker get the timesheet
-        workers_timesheet_morning = []
-        workers_timesheet_afternoon = []
+        worker_timesheet = []
         total_worker_morning = [0,0,0,0,0,0,0]
         total_worker_afternoon = [0,0,0,0,0,0,0]
         #Create for loop overs keys in workers
         for worker in workers:
-            worker = worker[1]
-            timesheet = Worker(Database(), worker).get_timesheet()
+            worker = worker[0:2]
+            present_morning = []
+            present_afternoon = []
+            timesheet = Worker(Database(), worker[1]).get_timesheet()
             dates_in_timesheet_morning = [x[0].strftime("%d-%m-%Y") for x in timesheet if x[1]== datetime.timedelta(hours=8)]
             dates_in_timesheet_afternoon = [x[0].strftime("%d-%m-%Y") for x in timesheet if x[1]== datetime.timedelta(hours=14)]
-            present = []
             for i in range(7):
                 if dates[i] in dates_in_timesheet_morning:
                     present_morning.append((dates[i],True))
@@ -322,16 +320,10 @@ def route_planning():
                     total_worker_afternoon[i] += 1
                 else:
                     present_afternoon.append((dates[i],False))
-            workers_timesheet_morning.append((worker, present_morning))
-            workers_timesheet_afternoon.append((worker, present_afternoon))
-            
-        #print(worker_timesheet)
-        #print(dates)
-        #print(worker_timesheet)
+            worker_timesheet.append((worker, present_morning, present_afternoon))
         return render_template_with_alert("route_planning.html", user=current_user,
             dates=dates, 
-            workers_timesheet_morning=workers_timesheet_morning,
-            workers_timesheet_afternoon=workers_timesheet_afternoon,
+            workers_timesheet = worker_timesheet,
             total_worker_morning=total_worker_morning,
             total_worker_afternoon=total_worker_afternoon)
 if __name__ == "__main__":  #and the final closing function
