@@ -120,7 +120,7 @@
                                         <td>Working (Morning Shift):</td>
                                         {% for date, working in is_working_week_morning%}
 
-                                        <td class="text-center">
+                                        <td class="text-center" scope="col">
                                             <input type="checkbox" name="working_dates" value="{{ date }}_morning" 
                                             {% if working == True %}
                                             checked
@@ -129,11 +129,11 @@
                                         </td>
                                         {% endfor %}
                                     </tr>
-                                    <!--<tr>
+                                    <tr>
                                         <td>Working (Afternoon Shift):</td>
                                         {% for date, working in is_working_week_afternoon%}
 
-                                        <td class="text-center">
+                                        <td class="text-center" scope="col">
                                             <input type="checkbox" name="working_dates" value="{{ date }}_afternoon" 
                                             {% if working == True %}
                                             checked
@@ -141,7 +141,7 @@
                                             >
                                         </td>
                                         {% endfor %}
-                                    </tr>-->
+                                    </tr>
                                 </tbody>
                             </table>
                             <div class="text-center">

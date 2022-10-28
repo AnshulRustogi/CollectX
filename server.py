@@ -20,11 +20,12 @@ db = Database()
 class User:
     
     def __init__(self, email):
-        
         if Person.get_role(db, email) == 'W':
             self.user = Worker(db, email)
         elif Person.get_role(db, email) == 'M':
             self.user = Manager(db, email)
+        else:
+            self.user = Person(db, None)
         #else:
         #    self.user = None
         self.photo = session["photo"]
@@ -44,7 +45,8 @@ class User:
     def is_anonymous(self):
         return False
     def get_id(self):
-        return str(self.user.email)
+        print(self.user)
+        return self.user.email
     def get_role(self):
         return self.user.role
 

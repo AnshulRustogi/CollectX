@@ -4,16 +4,25 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 #Refer to Database class in db.py
 class Person:
-    def __init__(self, db, email):
+    def __init__(self, db, email=None):
         self.db = db
-        self.email = email
-        self.get_information()
-        if self.name==None:
-            self.update_details()
+        self.name = None
+        if email==None:
+            self.user = None
+            self.role = None
+        else:
+            
+            self.email = email
+            self.get_information()
+            if self.name==None:
+                self.update_details()
     
     @staticmethod
     def get_role(db, email: str):
-        return db.get_role(email)
+        try:
+            return db.get_role(email).upper()
+        except:
+            return None
     
     @staticmethod
     def check_exist(db, email:str):
@@ -28,13 +37,16 @@ class Person:
         #If person with email doesn't exist raise error
         if not self.exists():
             print('Person does not exist')
-            sys.exit(1)
+            return
         #Get person's name
         self.name = self.db.get_name(self.email)
         #Get person's phone number
         self.phone = self.db.get_phone(self.email)
         #Get person's address
-        self.role = self.db.get_role(self.email)
+        try:
+            self.role = self.db.get_role(self.email).upper()
+        except:
+            self.role = None
 
     #Check if person exists
     def exists(self):

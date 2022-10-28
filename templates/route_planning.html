@@ -101,6 +101,7 @@
                     </div>
                     <div class="card-body">
                         <form action="{{ url_for('worker_timesheet') }}" method="POST">
+                            
                             <table class="table table-bordered">
                                 <thead class="thead-dark">
                                     <tr>
@@ -114,67 +115,152 @@
                                         <th scope="col">Sunday</th>
                                     </tr>
                                     <tr>
-                                        <th>Worker Email</td>
+                                        <th scope="col">Worker Email</td>
                                         {% for date in dates%}
-                                        <th class="text-center">{{ date }}</td>
+                                        <th scope="col" class="text-center">{{ date }}</td>
                                         {% endfor %}
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for (worker_name,worker_email), dates_morning, dates_afternoon in workers_timesheet %}
                                     <tr>
-                                        <td style="border-bottom: none;" colspan="8">{{ loop.index }}. Name: <b>{{ worker_name }}</b>, Email: <b>{{ worker_email }}</b></td>
+                                        <td style="border-bottom: none;" colspan="8" scope="col">{{ loop.index }}. Name: <b>{{ worker_name }}</b>, Email: <b>{{ worker_email }}</b></td>
                                     </tr>
                                     <tr>
                                         <td>Morning Shift:</td>
                                         {% for day, working in dates_morning %}
                                         <td class="text-center" scope="col">
-                                            <input type="checkbox" name="working" value="{{ day }}_morning" {% if working %} checked {% endif %}>
+                                            {% if working %} <i class="fa fa-check" style="color: green;"></i> {% endif %}
                                         </td>
                                         {% endfor %}
                                     </tr>
                                     <tr>
-                                        <td scope="col">Afternoon Shift:</td>
+                                        <td>Afternoon Shift:</td>
                                         {% for day, working in dates_afternoon %}
                                         <td class="text-center" scope="col">
-                                            <input type="checkbox" name="working" value="{{ day }}_afternoon" {% if working %} checked {% endif %}>
+                                            {% if working %} <i class="fa fa-check" style="color: green;"></i> {% endif %}
                                         </td>
                                         {% endfor %}
                                     </tr>
                                     {% endfor %}
-                                    <!--Insert gap between two rows-->
+                                    
                                     <tr>
-                                        <td colspan="8">&nbsp;</td>
+                                        <td colspan="8" scope="col">&nbsp;</td>
                                     </tr>
                                     <tr>
-                                        <td scope="col">Total Morning: </td>
+                                        <td scope="col" scope="col">Total Morning: </td>
                                         {% for total_date in total_worker_morning %}
-                                        <td scope="col" class="text-center" {% if total_date==0 %} style="color:black; background-color:red" {% endif %}>
+                                        <td scope="col" class="text-center" {% if total_date==0 %} style="color:black; background-color:red" {% endif %} scope="col">
                                             {% if total_date!=0 %} {{ total_date }} {% else %} NO WORKER PRESENT {% endif %}
                                         </td>
                                         {% endfor %}
                                     </tr>
                                     <tr>
-                                        <td scope="col">Total Afternoon: </td>
+                                        <td scope="col" scope="col">Total Afternoon: </td>
                                         {% for total_date in total_worker_afternoon %}
-                                        <td scope="col" class="text-center" {% if total_date==0 %} style="color:black; background-color:red" {% endif %}>
+                                        <td scope="col" class="text-center" {% if total_date==0 %} style="color:black; background-color:red" {% endif %} scope="col">
                                             {% if total_date!=0 %} {{ total_date }} {% else %} NO WORKER PRESENT {% endif %}
                                         </td>
                                         {% endfor %}
                                     </tr>
                                     <tr>
-                                        <td colspan="8" scope="col">
+                                        <td colspan="8" scope="col" scope="col">
                                             <button type="submit" class="btn btn-danger btn-block" disabled>Raise overtime request</button>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="8">
+                                        <td colspan="8" scope="col">
                                             <button type="submit" class="btn btn-success btn-block" disabled>Generate Route for next week</button>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                             
+                            <!--
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="">
+                                            
+                                            <div class="container border-bottom">
+                                                <div class="row" style="background-color:#343a40;font-weight: bold;color: rgb(255, 255, 255);padding: 5px;">
+                                                    <div class="col">Day</div>
+                                                    <div class="col">Monday</div>
+                                                    <div class="col">Tuesday</div>
+                                                    <div class="col">Wednesday</div>
+                                                    <div class="col">Thursday</div>
+                                                    <div class="col">Friday</div>
+                                                    <div class="col">Saturday</div>
+                                                    <div class="col">Sunday</div>
+                                                </div>
+
+                                                <div class="row" style="background-color:#343a40;font-weight: bold;color: rgb(255, 255, 255);
+                                                padding: 5px;
+                                                    ">
+                                                    <div class="col">Email \ Dates</div>
+                                                    {% for date in dates%}
+                                                    <div class="col" class="text-center">{{ date }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                                <br>
+                                                {% for (worker_name,worker_email), dates_morning, dates_afternoon in workers_timesheet %}
+                                                    
+                                                        <div class="row " style="padding: 5px;">
+                                                            <p>Name: <b> {{ worker_name }}</b>, Email: <b> {{ worker_email }}</b></p>
+                                                        </div>
+                                                        <div class="row" style="padding: 5px;">
+                                                            <div class="col" style="padding: 5px;">Morning Shift:</div>
+                                                            {% for day, working in dates_morning %}
+                                                            <div class="col text-center border" style="padding: 5px;">
+                                                                <input type="checkbox" name="working" value="{{ day }}_morning"{% if working %} checked {% endif %}>
+                                                            </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                        <div class="row" style="padding: 5px;">
+                                                            <div class="col" style="padding: 5px;">Afternoon Shift:</div>
+                                                            {% for day, working in dates_afternoon %}
+                                                            <div class="col text-center border" style="padding: 5px;">
+                                                                <input type="checkbox" name="working" value="{{ day }}_afternoon"{% if working %} checked {% endif %}>
+                                                            </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    
+                                                    <br>
+                                                {% endfor %}
+
+                                                <div class="row" style="padding: 5px;">
+                                                    <div class="col" style="padding: 5px;">Total Morning: </div>
+                                                    {% for total_date in total_worker_morning %}
+                                                    <div class="col text-center border" style="padding: 5px; {% if total_date==0 %}color:black; background-color:red {% endif %}">
+                                                        {% if total_date!=0 %} {{ total_date }} {% else %} NONE {% endif %}
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                                <div class="row" style="padding: 5px;">
+                                                    <div class="col" style="padding: 5px;">Total Afternoon: </div>
+                                                    {% for total_date in total_worker_afternoon %}
+                                                    <div class="col text-center border" style="padding: 5px; {% if total_date==0 %}color:black; background-color:red {% endif %}">
+                                                        {% if total_date!=0 %} {{ total_date }} {% else %} NONE {% endif %}
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+
+                                                <div class="row" style="padding: 5px;">
+                                                    <div class="col" style="padding: 5px;">
+                                                        <button type="submit" class="btn btn-danger btn-block" disabled>Raise overtime request</button>
+                                                    </div>
+                                                </div>
+                                                <div class="row" style="padding: 5px;">
+                                                    <div class="cow" style="padding: 5px;">
+                                                        <button style="width: 100%;" type="submit" class="btn btn-success btn-block" disabled>Generate Route for next week</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            -->
                         </form>
                     </div>
                 </div>

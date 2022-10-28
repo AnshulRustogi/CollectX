@@ -170,6 +170,7 @@ class Database:
                         return False
                     self.execute("UPDATE worker_update_request SET approved_by_mg2 = %s, valid = 0 WHERE EmailID = %s", (mgr_email, w_email))
                     self.execute("DELETE FROM Person WHERE EmailID = %s", (w_email,))
+                    self.execute("DELETE FROM timesheet WHERE EmailID = %s", (w_email,))
                     self.cnx.commit()
                     self.error = None
                     return True
