@@ -82,7 +82,7 @@
                   {% endif %}
               </ul>
           </div>
-      </nav>
+        </nav>
     <!-- Navbar -->
 
     <!-- Content -->    
@@ -117,7 +117,7 @@
                   {% if worker[2] == 'a' %}
                     <td>
                       <input type="hidden" name="action_type" value="add">
-                      <input style="width: 100%;" type="submit" class="btn btn-primary float-center" value="Add">
+                      <input style="width: 100%;" type="submit" class="btn btn-success float-center" value="Add">
                     </td>
                   {% else %}
                     <td>
@@ -147,7 +147,7 @@
             <tr>
               <td scope="row" width="5%"></td>
               <form action="worker_update" method="POST">
-                <td><input type="email" name="worker_email" placeholder="Please enter worker email" required>
+                <td><input style="width: 100%;" type="email" name="worker_email" placeholder=" Please enter worker email" required>
                 </td>
                   <td>
                     <input type="hidden" name="action_type" value="add">
