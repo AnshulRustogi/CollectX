@@ -3,6 +3,7 @@ import pathlib
 import re
 import requests
 from flask import Flask, session, abort, redirect, request, render_template
+from flask_assets import Environment, Bundle
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
@@ -11,13 +12,15 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from worker import Worker, Manager, Person
 from db import Database
 import datetime
+
 alert = None
 alert_message = None
 
+db = Database()
 class User:
     
     def __init__(self, email):
-        db = Database()
+        
         if Person.get_role(db, email) == 'W':
             self.user = Worker(db, email)
         elif Person.get_role(db, email) == 'M':
@@ -46,8 +49,23 @@ class User:
         return self.user.role
 
 app = Flask("CollectX")  #naming our application
+assets     = Environment(app)
+assets.url = app.static_url_path
+
+scss       = Bundle('css/form.scss', filters='pyscss', output='css/profile_form.css')
+
+assets.config['SECRET_KEY'] = 'SDL-CollectX'
+assets.config['PYSCSS_LOAD_PATHS'] = assets.load_path
+assets.config['PYSCSS_STATIC_URL'] = assets.url
+assets.config['PYSCSS_STATIC_ROOT'] = assets.directory
+assets.config['PYSCSS_ASSETS_URL'] = assets.url
+assets.config['PYSCSS_ASSETS_ROOT'] = assets.directory
+
+assets.register('scss_all', scss)
+
 app.secret_key = "SDL-CollectX"  #it is necessary to set a password when dealing with OAuth 2.0
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  #this is to set our environment to https because OAuth 2.0 only supports https environments
+
 
 GOOGLE_CLIENT_ID = "404997951228-bm3hrsq5dudpdkgkdicl3kh2hvtev8g1.apps.googleusercontent.com"  #enter your client id you got from Google console
 client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secret.json")  #set the path to where the .json file you got Google console is
@@ -132,6 +150,8 @@ def render_template_with_alert(template, **kwargs):
         pass
     r = render_template(template, alert=alert, alert_message=alert_message, **kwargs)
     alert = False
+    global db
+    db = Database()
     return r
 
 @app.route("/")  #the home page where the login button will be located

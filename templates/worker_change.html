@@ -6,18 +6,27 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <!-- load js present in static folder using flask -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.2/css/all.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <!-- 
+      load js present in static folder using flask 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.min.js"></script>
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
-    <script src="https://apis.google.com/js/api:client.js"></script>
+      
+  -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.min.js"></script>
+     
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.2/css/all.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://apis.google.com/js/api:client.js"></script>
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navbar.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/profile.css') }}">
     <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
@@ -79,31 +88,41 @@
     <!-- Content -->    
     
     <div class="container">
-        <h2>Details of all workers and managers</h2>
+        <div class="container text-center">
+          <h1>Details of all workers</h1>
+        </div>
         <br>
-        <h4>Pending Requests</h4>
-        <table class="table table-condensed table-hover">
-          <thead>
+        <div class="container text-center">
+          <h2>Pending Requests</h2>
+        </div>
+        
+        <br>
+        <table class="table table-bordered table-hover">
+          <thead class="thead-dark">
+            <!-- Add S.no to table-->
             <tr>
-              <th>Email</th>
-              <th>Action</th>
+              <th scope="col" width="5%">S.No</th>
+              <th scope="col">Email</th>
+              <th scope="col">Action</th>
             </tr>
           </thead>
           <tbody>
+
             {% for worker in raised_by_other %}
             <tr>
+              <td scope="row" width="5%">{{ loop.index }}</td>
               <form action="worker_update" method="POST">
                 <td>{{worker[1]}}</td>
                 <input type="hidden" name="worker_email" value="{{worker[1]}}">
                   {% if worker[2] == 'a' %}
                     <td>
                       <input type="hidden" name="action_type" value="add">
-                      <input type="submit" class="btn float-center" value="Add">
+                      <input style="width: 100%;" type="submit" class="btn btn-primary float-center" value="Add">
                     </td>
                   {% else %}
                     <td>
                       <input type="hidden" name="action_type" value="remove">
-                      <input type="submit" class="btn float-center" value="Remove">
+                      <input style="width: 100%;" type="submit" class="btn btn-danger float-center" value="Remove">
                     </td>
                 {% endif %}
               </form>
@@ -111,56 +130,59 @@
             {% endfor %}
             {% for worker in raised_by_user %}
             <tr>
-              <form>
-                <td>{{worker[1]}}</td>
-                <input type="hidden" name="worker_email" value="{{worker[1]}}">
-                  {% if worker[2] == 'a' %}
-                    <td>
-                      <input type="hidden" name="action_type" value="add">
-                      <input type="submit" class="btn float-center disabled" value="Add">
-                    </td>
-                  {% else %}
-                    <td>
-                      <input type="hidden" name="action_type" value="remove">
-                      <input type="submit" class="btn float-center disabled" value="Remove">
-                    </td>
-                {% endif %}
-              </form>
+              <td scope="row" width="5%">{{ loop.index }}</td>
+              <td>{{worker[1]}}</td>
+              <input type="hidden" name="worker_email" value="{{worker[1]}}">
+              {% if worker[2] == 'a' %}
+                <td>
+                  <input style="width: 100%;" type="submit" class="btn btn-success float-center" value="Add" disabled>
+                </td>
+              {% else %}
+                <td>
+                  <input style="width: 100%;" type="submit" class="btn btn-danger float-center disabled" value="Remove" disabled>
+                </td>
+              {% endif %}
             </tr>
             {% endfor %}
             <tr>
+              <td scope="row" width="5%"></td>
               <form action="worker_update" method="POST">
                 <td><input type="email" name="worker_email" placeholder="Please enter worker email" required>
                 </td>
                   <td>
                     <input type="hidden" name="action_type" value="add">
-                    <input type="submit" class="btn float-center" value="Add">
+                    <input style="width: 100%;" type="submit" class="btn btn-success float-center" value="Add">
                   </td>
               </form>
             </tr>
             
           </tbody>
         </table>
-        <h4>Current Members</h4>
-        <table class="table table-condensed table-hover">
-          <thead>
+        <div class="container text-center">
+          <h2>Current Members</h2>
+        </div>
+        <br>
+        <table class="table table-hover table-bordered">
+          <thead class="thead-dark">
             <tr>
-              <th>Firstname</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Action</th>
+              <th scope="col" width="5%">S.No</th>
+              <th scope="col">Firstname</th>
+              <th scope="col">Email</th>
+              <th scope="col">Phone</th>
+              <th scope="col">Action</th>
             </tr>
           </thead>
           <tbody>
             {% for worker in details %}
             <tr>
+              <td scope="row" width="5%">{{ loop.index }}</td>
               <form action="worker_update" method="POST">
                 <td>{{worker[0]}}</td>
                 <td>{{worker[1]}}</td>
                 <td>{{worker[2]}}</td>
                 <input type="hidden" name="worker_email" value="{{worker[1]}}">
                 <td>
-                  <input type="submit" name="action_type" class="btn btn-danger float-center" value="Remove">
+                  <input style="width: 100%;" type="submit" name="action_type" class="btn btn-danger float-center" value="Remove">
                 </td>
               </form>
             </tr>
