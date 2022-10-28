@@ -117,11 +117,24 @@
                                         {% endfor %}
                                     </tr>
                                     <tr>
-                                        <td>Working:</td>
-                                        {% for date, working in is_working_week%}
+                                        <td>Working (Morning Shift):</td>
+                                        {% for date, working in is_working_week_morning%}
 
                                         <td class="text-center">
-                                            <input type="checkbox" name="working_dates" value="{{ date }}" 
+                                            <input type="checkbox" name="working_dates" value="{{ date }}_morning" 
+                                            {% if working == True %}
+                                            checked
+                                            {% endif %}
+                                            >
+                                        </td>
+                                        {% endfor %}
+                                    </tr>
+                                    <tr>
+                                        <td>Working (Afternoon Shift):</td>
+                                        {% for date, working in is_working_week_afternoon%}
+
+                                        <td class="text-center">
+                                            <input type="checkbox" name="working_dates" value="{{ date }}_afternoon" 
                                             {% if working == True %}
                                             checked
                                             {% endif %}

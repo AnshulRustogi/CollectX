@@ -211,19 +211,25 @@ def worker_timesheet():
         next_monday = today + datetime.timedelta(days=-today.weekday(), weeks=1)
         #Create list of dates for next week and append the dates as string
         dates = []
-        present = []
+        present_morning = []
+        present_afternoon = []
         timesheet = current_user.user.get_timesheet()
-        dates_in_timesheet = [x[0].strftime("%d-%m-%Y") for x in timesheet]
+        #dates_in_timesheet = [x[0].strftime("%d-%m-%Y") for x in timesheet]
+        dates_in_timesheet_morning = [x[0].strftime("%d-%m-%Y") for x in timesheet if x[1]== datetime.timedelta(hours=8)]
+        dates_in_timesheet_afternoon = [x[0].strftime("%d-%m-%Y") for x in timesheet if x[1]== datetime.timedelta(hours=14)]
         for i in range(7):
             dates.append((next_monday + datetime.timedelta(days=i)).strftime("%d-%m-%Y"))
-            if dates[i] in dates_in_timesheet:
-                present.append(True)
+            if dates[i] in dates_in_timesheet_morning:
+                present_morning.append((dates[i],True))
             else:
-                present.append(False)
+                present_morning.append((dates[i],False))
+            if dates[i] in dates_in_timesheet_afternoon:
+                present_afternoon.append((dates[i],True))
+            else:
+                present_afternoon.append((dates[i],False))
+
         if request.method == 'POST':
-            print(dates_in_timesheet)
-            current_user.user.remove_timesheet(dates_in_timesheet)
-            print(current_user.user.get_timesheet())
+            current_user.user.remove_timesheet(dates_in_timesheet_morning, dates_in_timesheet_afternoon)
             newWorkingDates = request.form.getlist('working_dates')
             current_user.user.update_timesheet(newWorkingDates)
             return redirect('/worker_timesheet')
@@ -250,7 +256,9 @@ def worker_timesheet():
         #        present.append(False)
 
         return render_template_with_alert("worker_timesheet.html", user=current_user,
-            dates=dates, is_working_week=present)
+            dates=dates, 
+            is_working_week_morning=present_morning,
+            is_working_week_afternoon=present_afternoon)
     else:
         return redirect('/index')
 
@@ -265,29 +273,46 @@ def route_planning():
         next_monday = today + datetime.timedelta(days=-today.weekday(), weeks=1)
         #Create list of dates for next week and append the dates as string
         dates = []
-        present = []
+        present_morning = []
+        present_afternoon = []
         for i in range(7):
             dates.append((next_monday + datetime.timedelta(days=i)).strftime("%d-%m-%Y"))
         #Get all the workers
         workers = current_user.user.get_all_userdetails()
         #For each worker get the timesheet
-        workers_timesheet = []
+        workers_timesheet_morning = []
+        workers_timesheet_afternoon = []
+        total_worker_morning = [0,0,0,0,0,0,0]
+        total_worker_afternoon = [0,0,0,0,0,0,0]
         #Create for loop overs keys in workers
         for worker in workers:
             worker = worker[1]
             timesheet = Worker(Database(), worker).get_timesheet()
-            dates_in_timesheet = [x[0].strftime("%d-%m-%Y") for x in timesheet]
+            dates_in_timesheet_morning = [x[0].strftime("%d-%m-%Y") for x in timesheet if x[1]== datetime.timedelta(hours=8)]
+            dates_in_timesheet_afternoon = [x[0].strftime("%d-%m-%Y") for x in timesheet if x[1]== datetime.timedelta(hours=14)]
             present = []
             for i in range(7):
-                if dates[i] in dates_in_timesheet:
-                    present.append((dates[i], True))
+                if dates[i] in dates_in_timesheet_morning:
+                    present_morning.append((dates[i],True))
+                    total_worker_morning[i] += 1
                 else:
-                    present.append((dates[i],False))
-            workers_timesheet.append((worker, present))
+                    present_morning.append((dates[i],False))
+                if dates[i] in dates_in_timesheet_afternoon:
+                    present_afternoon.append((dates[i],True))
+                    total_worker_afternoon[i] += 1
+                else:
+                    present_afternoon.append((dates[i],False))
+            workers_timesheet_morning.append((worker, present_morning))
+            workers_timesheet_afternoon.append((worker, present_afternoon))
+            
         #print(worker_timesheet)
         #print(dates)
         #print(worker_timesheet)
         return render_template_with_alert("route_planning.html", user=current_user,
-            dates=dates, workers_timesheet=workers_timesheet)
+            dates=dates, 
+            workers_timesheet_morning=workers_timesheet_morning,
+            workers_timesheet_afternoon=workers_timesheet_afternoon,
+            total_worker_morning=total_worker_morning,
+            total_worker_afternoon=total_worker_afternoon)
 if __name__ == "__main__":  #and the final closing function
     app.run(debug=True)

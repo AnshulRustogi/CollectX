@@ -53,12 +53,18 @@ class Worker(Person):
 
     def update_timesheet(self, present: list):
         for date in present:
-            self.update_timesheet_complete(date, "10:00", "13:00")
+            date, timeSlot = date.split('_')
+            if timeSlot == 'morning':
+                self.update_timesheet_complete(date, "8:00", "12:00")
+            else:
+                self.update_timesheet_complete(date, "14:00", "16:00")
         return
         
-    def remove_timesheet(self, present: list):
-        for date in present:
-            self.remove_timesheet_complete(date, "10:00", "13:00")
+    def remove_timesheet(self, present_moring: list, present_afternoon: list):
+        for date in present_moring:
+            self.remove_timesheet_complete(date, "8:00", "12:00")
+        for date in present_afternoon:
+            self.remove_timesheet_complete(date, "14:00", "16:00")
         return
 
     def remove_timesheet_complete(self, date: str, start_time, end_time):
@@ -77,13 +83,13 @@ class Worker(Person):
             print('Start time cannot be after end time')
             return
         #Check if start time is before 6am
-        if start_time_obj.hour < 6:
-            print('Start time cannot be before 6am')
-            return False
+        #if start_time_obj.hour < 6:
+        #    print('Start time cannot be before 6am')
+        #    return False
         #Check if end time is after 2pm
-        if end_time_obj.hour > 14:
-            print('End time cannot be after 2pm')
-            return True
+        #if end_time_obj.hour > 14:
+        #    print('End time cannot be after 2pm')
+        #    return True
 
         #Format start_time and end_time to string
         #date = date.strftime('%Y-%m-%d')
@@ -112,20 +118,20 @@ class Worker(Person):
             print('Start time cannot be after end time')
             return
         #Check if start time is before 6am
-        if start_time_obj.hour < 6:
-            print('Start time cannot be before 6am')
-            return False
+        #if start_time_obj.hour < 6:
+        #    print('Start time cannot be before 6am')
+        #    return False
         #Check if end time is after 2pm
-        if end_time_obj.hour > 14:
-            print('End time cannot be after 2pm')
-            return True
+        #if end_time_obj.hour > 14:
+        #    print('End time cannot be after 2pm')
+        #    return True
 
         #Format start_time and end_time to string
         #date = date.strftime('%Y-%m-%d')
         #start_time = start_time.strftime('%H:%M:%S')
         #end_time = end_time.strftime('%H:%M:%S')
         #Check if there is a clash
-        if self.db.check_timesheet_clash(self.email, date, start_time, end_time):
+        if self.db.check_timesheet_clash(self.email, datetime.strptime(date, "%d-%m-%Y").strftime("%Y-%m-%d"), start_time, end_time):
             print('Timesheet clash')
             return False
         #Update timesheet

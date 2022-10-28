@@ -49,12 +49,16 @@ class Database:
     def execute(self, query, args=None):
         try:
             if args is None:
+                
                 self.cursor.execute(query)
             else:
+                
                 self.cursor.execute(query, args)
         except mysql.connector.Error as err:
             self.error = err
             print(err)
+            print("Error")
+            print(query, args)
 
     #Check if tables exists
     def check_table(self, table_name: list) -> bool:

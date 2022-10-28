@@ -63,10 +63,11 @@ i {
 	display:inline-block;
 	position:absolute;
 	height: 100%;
-	top: 0px;
-	left: 0px;
-	transition-duration:0.6s;
-	transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+	top: -10px;
+	/*transition-duration:0.6s;
+	transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55); */
+	transition-duration: 0.2s;
+	transition-timing-function: ease-in;
 	background-color: #fff;
 	margin-top: 10px;
 }
@@ -101,7 +102,6 @@ i {
 	bottom: 0;
     left: -25px;
 }
-
 
 @media(min-width: 992px){
 	.navbar-expand-custom {
