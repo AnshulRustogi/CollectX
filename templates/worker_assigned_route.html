@@ -48,10 +48,10 @@
                                 <a class="nav-link" id = "" href="{{ url_for('add_newbin') }}"><i class="fa fa-plus"></i>Add New Bin</a>
                             </li>
                         {% else %}
-                        <li class="nav-item active">
+                        <li class="nav-item">
                                 <a class="nav-link" id = "worker_timesheet" href="{{ url_for('worker_timesheet') }}"><i class="far fa-address-book"></i>Timesheet</a>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item active">
                                 <a class="nav-link" id = "self_profile" href="{{ url_for('assinged_route') }} "><i class="far fa-address-book"></i>Assigned Routes</a>
                             </li> 
                         {% endif %}
@@ -81,85 +81,58 @@
     </script>
     {% endif %}
     <!-- Content -->
-    <!--Create a table with 7 columns and name them with weekdays
-    in the first row write the weeknumber and in the second row write None-->
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                        Timesheet
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{ url_for('worker_timesheet') }}" method="POST">
-                            <table class="table table-bordered">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th scope="col"></th>
-                                        
-                                        <th scope="col">Monday</th>
-                                        <th scope="col">Tuesday</th>
-                                        <th scope="col">Wednesday</th>
-                                        <th scope="col">Thursday</th>
-                                        <th scope="col">Friday</th>
-                                        <th scope="col">Saturday</th>
-                                        <th scope="col">Sunday</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Date:</td>
-                                        {% for date in dates%}
-                                        <td class="text-center">{{ date }}</td>
-                                        {% endfor %}
-                                    </tr>
-                                    <tr>
-                                        <td>Working (Morning Shift):</td>
-                                        {% for date, working in is_working_week_morning%}
-
-                                        <td class="text-center" scope="col">
-                                            <input type="checkbox" name="working_dates" value="{{ date }}_morning" 
-                                            {% if working == True %}
-                                            checked
-                                            {% endif %}
-                                            >
-                                        </td>
-                                        {% endfor %}
-                                    </tr>
-                                    <tr>
-                                        <td>Working (Afternoon Shift):</td>
-                                        {% for date, working in is_working_week_afternoon%}
-
-                                        <td class="text-center" scope="col">
-                                            <input type="checkbox" name="working_dates" value="{{ date }}_afternoon" 
-                                            {% if working == True %}
-                                            checked
-                                            {% endif %}
-                                            >
-                                        </td>
-                                        {% endfor %}
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-primary">Update</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <h1>Route:</h1>
+                <h3>Date: 29 October 2022</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Bin</th>
+                            <th scope="col">Visited/Status</th>
+                            <th scope="col">Directions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Dwarka Sector 22</td>
+                            <td>
+                                <!-- Button trigger modal -->
+                                <button style="width: 100%;" type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal">
+                                   <!-- fa question mark icon which changes to tick on click-->
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </td>
+                            <td><a href="#" class="">Link for direction</a></td>
+                        </tr>
+                        <tr>
+                            <td>Dwarka Sector 7</td>
+                            <td>
+                                <!-- Button trigger modal -->
+                                <button style="width: 100%;" type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal">
+                                    <!-- fa question mark icon which changes to tick on click-->
+                                     <i class="fa fa-check"></i>
+                                 </button>
+                            </td>
+                            <td><a href="#" class="">Link for direction</a></td>
+                        </tr><tr>
+                            <td>Janakpuri</td>
+                            <td>
+                                <!-- Button trigger modal -->
+                                <button style="width: 100%;" type="button" class="btn btn-secondary" data-toggle="modal" data-target="#exampleModal">
+                                    <!-- fa question mark icon which changes to tick on click-->
+                                     <i class="fa fa-clock-o"></i>
+                                 </button>
+                            </td>
+                            <td><a href="#" class="">Link for direction</a></td>
+                        </tr>
+                    </tbody>
             </div>
         </div>
-    </div>
 
-    <!-- Content -->
-
-
-    
-
-
-
+        <!--Show the current active pane from navbar-->
+        
     
 
     </body>

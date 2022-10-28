@@ -22,6 +22,7 @@
     <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
 
     </head>
+    
     <body>
         <!-- Navbar -->
         <nav class="navbar navbar-expand-custom navbar-mainbg">
@@ -44,11 +45,11 @@
                             <li class="nav-item">
                                 <a class="nav-link" id = "worker_update" href="{{ url_for('worker_update') }}"><i class="far fa-address-book"></i>Worker Details</a>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item active">
                                 <a class="nav-link" id = "" href="{{ url_for('add_newbin') }}"><i class="fa fa-plus"></i>Add New Bin</a>
                             </li>
                         {% else %}
-                        <li class="nav-item active">
+                        <li class="nav-item">
                                 <a class="nav-link" id = "worker_timesheet" href="{{ url_for('worker_timesheet') }}"><i class="far fa-address-book"></i>Timesheet</a>
                             </li>
                             <li class="nav-item">
@@ -73,6 +74,7 @@
                 </ul>
             </div>
         </nav>
+
     <!-- Navbar -->
     <!--If alert is not None raise the alert-->
     {% if alert %}
@@ -81,85 +83,64 @@
     </script>
     {% endif %}
     <!-- Content -->
-    <!--Create a table with 7 columns and name them with weekdays
-    in the first row write the weeknumber and in the second row write None-->
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                        Timesheet
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{ url_for('worker_timesheet') }}" method="POST">
-                            <table class="table table-bordered">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th scope="col"></th>
-                                        
-                                        <th scope="col">Monday</th>
-                                        <th scope="col">Tuesday</th>
-                                        <th scope="col">Wednesday</th>
-                                        <th scope="col">Thursday</th>
-                                        <th scope="col">Friday</th>
-                                        <th scope="col">Saturday</th>
-                                        <th scope="col">Sunday</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Date:</td>
-                                        {% for date in dates%}
-                                        <td class="text-center">{{ date }}</td>
-                                        {% endfor %}
-                                    </tr>
-                                    <tr>
-                                        <td>Working (Morning Shift):</td>
-                                        {% for date, working in is_working_week_morning%}
-
-                                        <td class="text-center" scope="col">
-                                            <input type="checkbox" name="working_dates" value="{{ date }}_morning" 
-                                            {% if working == True %}
-                                            checked
-                                            {% endif %}
-                                            >
-                                        </td>
-                                        {% endfor %}
-                                    </tr>
-                                    <tr>
-                                        <td>Working (Afternoon Shift):</td>
-                                        {% for date, working in is_working_week_afternoon%}
-
-                                        <td class="text-center" scope="col">
-                                            <input type="checkbox" name="working_dates" value="{{ date }}_afternoon" 
-                                            {% if working == True %}
-                                            checked
-                                            {% endif %}
-                                            >
-                                        </td>
-                                        {% endfor %}
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-primary">Update</button>
-                            </div>
-                        </form>
-                    </div>
+                <div class="text-center">
+                    <h1>Add New Bin</h1>
                 </div>
+                <form action="#">
+                    <div class="form-group row">
+                        <label for="bin_id" class="col-sm-2 col-form-label">Bin ID</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="bin_id" name="bin_id" placeholder="Bin ID">
+                        </div>
+                        <label for="bin_address" class="col-sm-2 col-form-label">Bin Address</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="bin_address" name="bin_address" placeholder="Bin Address">
+                        </div>
+                        <label for="bin_lat" class="col-sm-2 col-form-label">Bin Latitude</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="bin_lat" name="bin_lat" placeholder="Bin Latitude">
+                        </div> 
+                        <label for="bin_long" class="col-sm-2 col-form-label">Bin Longitude</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="bin_long" name="bin_long" placeholder="Bin Longitude">
+                        </div>
+                        <label for="Submit" class="col-sm-2 col-form-label"></label>
+                        <div class="col-sm-10">
+                            <button type="submit" class="btn btn-primary" disabled>Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-12">
+                <!-- List of current bins-->
+                <div class="text-center">
+                    <h1>Current Bins</h1>
+                </div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Bin Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Dwarka Sector 22</td>
+                        </tr>
+                        <tr>
+                            <td>Dwarka Sector 7</td>
+                        </tr>
+                        <tr>
+                            <td>Janakpuri</td>
+                        </tr>
+                    </tbody>
             </div>
         </div>
     </div>
-
-    <!-- Content -->
-
-
-    
-
-
-
+        <!--Show the current active pane from navbar-->
+        
     
 
     </body>

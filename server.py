@@ -81,7 +81,6 @@ flow = Flow.from_client_secrets_file(  #Flow is OAuth 2.0 a class that stores al
 login_manager = LoginManager()  #this is a class that will help us to manage our users
 login_manager.init_app(app)  #we are initializing our login manager
 
-
 @login_manager.user_loader  #this is a decorator that will help us to load the user
 def load_user(email_id):
     return User(email_id)
@@ -96,7 +95,6 @@ def login():
     session["state"] = state
     
     return redirect(authorization_url)
-
 
 @app.route("/callback")  #this is the page that will handle the callback process meaning process after the authorization
 def callback():
@@ -135,12 +133,6 @@ def callback():
     login_user(User(session["email"]))
     return redirect("/")  #the final page where the authorized users will end up
 
-
-@app.route("/index")  #the home page where the login button will be located
-def index():
-    global alert, alert_message
-    return render_template_with_alert("index.html", user=current_user)
-    
 def render_template_with_alert(template, **kwargs):
     global alert, alert_message
     try:
@@ -156,6 +148,11 @@ def render_template_with_alert(template, **kwargs):
     db = Database()
     return r
 
+@app.route("/index")  #the home page where the login button will be located
+def index():
+    global alert, alert_message
+    return render_template_with_alert("index.html", user=current_user)
+    
 @app.route("/")  #the home page where the login button will be located
 def home_page():
     return redirect("/index")
@@ -328,5 +325,31 @@ def route_planning():
             workers_timesheet = worker_timesheet,
             total_worker_morning=total_worker_morning,
             total_worker_afternoon=total_worker_afternoon)
+
+@app.route("/add_newbin", methods=['GET', 'POST'])
+@login_required
+def add_newbin():
+    global alert, alert_message
+    if current_user.user.role == "M":
+        if request.method == 'POST':
+            bin_id = request.form['bin_id']
+            bin_location = request.form['bin_location']
+            bin_type = request.form['bin_type']
+            bin_capacity = request.form['bin_capacity']
+            bin_status = request.form['bin_status']
+            current_user.user.add_newbin(bin_id, bin_location, bin_type, bin_capacity, bin_status)
+            return redirect('/add_newbin')
+        return render_template_with_alert("add_newbin.html", user=current_user)
+    else:
+        return redirect('/index')
+
+@app.route("/assinged_route")
+@login_required
+def assinged_route():
+    global alert, alert_message
+    if current_user.user.role == "W":
+        return render_template_with_alert("worker_assigned_route.html", user=current_user)
+    else:
+        return redirect('/index')
 if __name__ == "__main__":  #and the final closing function
     app.run(debug=True)
