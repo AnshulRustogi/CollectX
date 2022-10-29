@@ -77,8 +77,8 @@
                           
                       </li>
                   {% else %}
-                          <li class="nav-item active">
-                            <a class="nav-link" id = "dashboard" href="#" style="color:white;">Logged In User: {{ user.user.name }}</a>
+                          <li class="nav-item">
+                            <a class="nav-link" id = "dashboard" href="#" style="color:white;">Not logged in</a>
                           </li>
                           <li class="nav-item">
                               <a class="nav-link" href="{{ url_for('login') }}" role="button" style="text-transform:none">
