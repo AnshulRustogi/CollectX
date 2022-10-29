@@ -37,11 +37,15 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ml-auto">
                     <div class="hori-selector"><div class="left"></div><div class="right"></div></div>
-                    <li class="nav-item">
-                        <a class="nav-link" id = "dashboard" href="{{ url_for('index') }}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
-                    </li>
                     <!--If user is logged in and is M then show Details in the navbar-->
                     {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" id = "dashboard" href="#" style="color:white;">Logged In User: {{ user.user.name }}</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" id = "dashboard" href="{{ url_for('index') }}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+                        </li>
                         {% if user.get_role() == 'M' %}
                             <li class="nav-item">
                                 <a class="nav-link" id = "route" href="{{ url_for('route_planning')}}"><i class="fa fa-truck"></i>Route Planning</a>
@@ -68,6 +72,9 @@
                             
                         </li>
                     {% else %}
+                            <li class="nav-item active">
+                                <a class="nav-link" id = "dashboard" href="#" style="color:white;">Logged In User: {{ user.user.name }}</a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('login') }}" role="button" style="text-transform:none">
                                     <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
