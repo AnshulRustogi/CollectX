@@ -1,0 +1,15 @@
+cvxpy==1.2.2
+Flask==2.2.2
+Flask_Assets==2.0
+Flask_Login==0.6.2
+folium==0.13.0
+google_auth_oauthlib==0.5.3
+matplotlib==3.5.3
+mysql_connector_repackaged==0.3.1
+numpy==1.23.4
+openrouteservice==2.3.3
+pandas==1.5.1
+pip==22.3
+protobuf==4.21.9
+requests==2.28.1
+tqdm==4.64.1
