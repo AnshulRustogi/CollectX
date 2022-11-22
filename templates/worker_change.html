@@ -51,7 +51,7 @@
                     <li class="nav-item">
                         <a class="nav-link" id = "dashboard" href="{{ url_for('index') }}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
                     </li>
-                      {% if user.get_role() == 'M' %}
+                      {% if user.get_role() == 'm' %}
                           <li class="nav-item">
                               <a class="nav-link" id = "route" href="{{ url_for('route_planning')}}"><i class="fa fa-truck"></i>Route Planning</a>
                           </li>

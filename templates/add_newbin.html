@@ -43,7 +43,7 @@
                         <li class="nav-item">
                             <a class="nav-link" id = "dashboard" href="{{ url_for('index') }}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
                         </li>
-                        {% if user.get_role() == 'M' %}
+                        {% if user.get_role() == 'm' %}
                             <li class="nav-item">
                                 <a class="nav-link" id = "route" href="{{ url_for('route_planning')}}"><i class="fa fa-truck"></i>Route Planning</a>
                             </li>
@@ -97,27 +97,29 @@
                 <div class="text-center">
                     <h1>Add New Bin</h1>
                 </div>
-                <form action="#">
+                <form action="{{ url_for('add_newbin') }}" method="POST">
                     <div class="form-group row">
                         <label for="bin_id" class="col-sm-2 col-form-label">Bin ID</label>
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" id="bin_id" name="bin_id" placeholder="Bin ID">
+                            <input type="number" class="form-control" id="bin_id" name="bin_id" placeholder="Bin ID"  value="{{ new_bin_id }}">
                         </div>
-                        <label for="bin_address" class="col-sm-2 col-form-label">Bin Address</label>
+                        <label for="bin_address" class="col-sm-2 col-form-label">Bin Location</label>
                         <div class="col-sm-10">
                             <input type="text" class="form-control" id="bin_address" name="bin_address" placeholder="Bin Address">
                         </div>
+                        
                         <label for="bin_lat" class="col-sm-2 col-form-label">Bin Latitude</label>
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" id="bin_lat" name="bin_lat" placeholder="Bin Latitude">
+                            <input type="number" step="any" class="form-control" id="bin_lat" name="bin_lat" placeholder="Bin Latitude">
                         </div> 
                         <label for="bin_long" class="col-sm-2 col-form-label">Bin Longitude</label>
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" id="bin_long" name="bin_long" placeholder="Bin Longitude">
+                            <input type="number" step="any" class="form-control" id="bin_long" name="bin_long" placeholder="Bin Longitude">
                         </div>
+                    
                         <label for="Submit" class="col-sm-2 col-form-label"></label>
                         <div class="col-sm-10">
-                            <button type="submit" class="btn btn-primary" disabled>Submit</button>
+                            <button type="submit" class="btn btn-primary">Submit</button>
                         </div>
                     </div>
                 </form>
@@ -131,18 +133,19 @@
                     <thead>
                         <tr>
                             <th scope="col">Bin Address</th>
+                            <th scope="col">Bin Longitude</th>
+                            <th scope="col">Bin Latitude</th>
                         </tr>
                     </thead>
                     <tbody>
+                        {% for (binName, binLong, binLat )in all_bins %}
                         <tr>
-                            <td>Dwarka Sector 22</td>
+                            <td>{{ binName }}</td>
+                            <td>{{ binLong }}</td>
+                            <td>{{ binLat }}</td>
                         </tr>
-                        <tr>
-                            <td>Dwarka Sector 7</td>
-                        </tr>
-                        <tr>
-                            <td>Janakpuri</td>
-                        </tr>
+                        {% endfor %}
+                        
                     </tbody>
             </div>
         </div>

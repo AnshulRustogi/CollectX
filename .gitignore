@@ -1,3 +1,6 @@
 __pycache__/
 static/.webassets-cache/
 client_secret.json
+key
+mysql_setup/
+.ipynb_checkpoints/

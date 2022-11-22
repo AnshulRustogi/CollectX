@@ -14,13 +14,24 @@
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
     <script src="https://apis.google.com/js/api:client.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navbar.css') }}">
     <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+    <script>
+        $(document).ready(function(){
+            $(".size_chart").hide();
+            $("#option_{{ today_date }}").show();
+            $("#size_select").change(function(){
+            $('.size_chart').hide();
+            $('#'+$(this).val()).show();
+        });
 
+        });
+    </script>
     </head>
     <body>
         <!-- Navbar -->
@@ -41,7 +52,7 @@
                         <li class="nav-item">
                             <a class="nav-link" id = "dashboard" href="{{ url_for('index') }}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
                         </li>
-                        {% if user.get_role() == 'M' %}
+                        {% if user.get_role() == 'm' %}
                             <li class="nav-item">
                                 <a class="nav-link" id = "route" href="{{ url_for('route_planning')}}"><i class="fa fa-truck"></i>Route Planning</a>
                             </li>
@@ -91,50 +102,65 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <h1>Route:</h1>
-                <h3>Date: 29 October 2022</h3>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th scope="col">Bin</th>
-                            <th scope="col">Visited/Status</th>
-                            <th scope="col">Directions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Dwarka Sector 22</td>
-                            <td>
-                                <!-- Button trigger modal -->
-                                <button style="width: 100%;" type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal">
-                                   <!-- fa question mark icon which changes to tick on click-->
-                                    <i class="fa fa-check"></i>
-                                </button>
-                            </td>
-                            <td><a href="#" class="">Link for direction</a></td>
-                        </tr>
-                        <tr>
-                            <td>Dwarka Sector 7</td>
-                            <td>
-                                <!-- Button trigger modal -->
-                                <button style="width: 100%;" type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal">
-                                    <!-- fa question mark icon which changes to tick on click-->
-                                     <i class="fa fa-check"></i>
-                                 </button>
-                            </td>
-                            <td><a href="#" class="">Link for direction</a></td>
-                        </tr><tr>
-                            <td>Janakpuri</td>
-                            <td>
-                                <!-- Button trigger modal -->
-                                <button style="width: 100%;" type="button" class="btn btn-secondary" data-toggle="modal" data-target="#exampleModal">
-                                    <!-- fa question mark icon which changes to tick on click-->
-                                     <i class="fa fa-clock-o"></i>
-                                 </button>
-                            </td>
-                            <td><a href="#" class="">Link for direction</a></td>
-                        </tr>
-                    </tbody>
+                <h1 class="text-center">Route</h1>
+                <h3>Date: <select id="size_select">
+                    {% for date in dates %}
+                        <option value="option_{{date}}" {% if date==today_date %} selected {% endif %}>{{ date }} </option>
+                    {% endfor %}
+                  </select> </h3>
+                {% for date, route_morning, route_afternoon in all_data %}
+                <div class="size_chart" id="option_{{date}}">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col" colspan="2" class="text-center">Morning</th>
+                            </tr>
+                            <tr>
+                                <th scope="col">Bin</th>
+                                <th scope="col">Directions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if route_morning==[] %}
+                                <tr>
+                                    <td colspan="2" class="text-center">No route morning route assigned for {{date}}</td>
+                                </tr>
+                            {% else %}
+                                {% for binName, link in route_morning %}
+                                <tr>
+                                    <td>{{ binName }}</td>
+                                    <td><a href="{{ link }}" class="" target="_blank">Link for direction </a></td>
+                                </tr>
+                                {% endfor %}
+                            {% endif %}
+                        </tbody>
+                        <thead>
+                            <tr>
+                                <th scope="col" colspan="2" class="text-center">Afternoon</th>
+                            </tr>
+                            <tr>
+                                <th scope="col">Bin</th>
+                                <th scope="col">Directions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if route_afternoon==[] %}
+                                <tr>
+                                    <td colspan="2" class="text-center">No route afternoon route assigned for {{date}}</td>
+                                </tr>
+                            {% else %}
+                                {% for binName, link in route_afternoon %}
+                                <tr>
+                                    <td>{{ binName }}</td>
+                                    <td><a href="{{ link }}" class="" target="_blank">Link for direction </a></td>
+                                </tr>
+                                {% endfor %}
+                            {% endif %}
+                            
+                        </tbody>
+                    </table>
+                </div>
+                {% endfor %}
             </div>
         </div>
 

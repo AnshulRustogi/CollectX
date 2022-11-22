@@ -42,7 +42,7 @@
                         <li class="nav-item active">
                             <a class="nav-link" id = "dashboard" href="{{ url_for('index') }}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
                         </li>
-                        {% if user.get_role() == 'M' %}
+                        {% if user.get_role() == 'm' %}
                             <li class="nav-item">
                                 <a class="nav-link" id = "route" href="{{ url_for('route_planning')}}"><i class="fa fa-truck"></i>Route Planning</a>
                             </li>
@@ -96,7 +96,12 @@
                 <p>CollectX is a web application that helps you to manage your waste collection business. It helps you to manage your workers, routes and other details.</p>
             </div>
         </div>
-        <div class="flourish-embed flourish-network" data-src="visualisation/11579678"><script src="https://public.flourish.studio/resources/embed.js"></script></div>
+        <!--Load the html file present in templates/map.html as an iframe-->
+        <div class="row">
+            <div class="col-md-12">
+                <iframe src="{{ url_for('map') }}" width="100%" height="500px"></iframe>
+            </div>
+        </div>
 
         <!--Show the current active pane from navbar-->
         

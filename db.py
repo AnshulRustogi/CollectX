@@ -13,9 +13,9 @@ class Database:
         #Connect to database
         try:
             #mongodb+srv://root:<password>@cluster0.jkh5rrc.mongodb.net/?retryWrites=true&w=majority
-            self.cnx = mysql.connector.connect(user='root', password='password', 
+            self.cnx = mysql.connector.connect(user='root',
                             host='localhost', database='collectx')
-            print("Connected to database")
+            #print("Connected to database")
 
             self.cursor = self.cnx.cursor()
             if not self.cnx.is_connected():
@@ -23,7 +23,7 @@ class Database:
                 sys.exit(1)
             self.cursor = self.cnx.cursor()
             #Check if all the tables exist
-            self.tables = ["Person", "MCD", "Timesheet", "worker_update_request", "recieve_overtime", "overtime_accepted", "BaseDisplay", "Bins", "Route","EdgeBetween2Bin"]
+            self.tables = ["person", "mcd", "timesheet", "worker_update_request", "recieve_overtime", "overtime_accepted", "basedisplay", "bins", "route", "edgebetween2bin"]
             self.tables = [x.lower() for x in self.tables]
             if not self.check_table(self.tables):
                 print("Tables not found")
@@ -49,16 +49,16 @@ class Database:
     def execute(self, query, args=None):
         try:
             if args is None:
-                
                 self.cursor.execute(query)
             else:
-                
                 self.cursor.execute(query, args)
+            return True
         except mysql.connector.Error as err:
             self.error = err
             print(err)
-            print("Error")
+            print("Error in db query")
             print(query, args)
+            return False
 
     #Check if tables exists
     def check_table(self, table_name: list) -> bool:
@@ -85,12 +85,12 @@ class Database:
         #Create new tables
         try:
             #Create Person table
-            self.execute("CREATE TABLE Person(Name VARCHAR(100), EmailID VARCHAR(150) PRIMARY KEY, Phone_Number BIGINT, Role VARCHAR(1))")
+            self.execute("CREATE TABLE person(Name VARCHAR(100), EmailID VARCHAR(150) PRIMARY KEY, Phone_Number BIGINT, Role VARCHAR(1))")
             #Create MCD table
-            self.execute("CREATE TABLE MCD(EmailID VARCHAR(150) PRIMARY KEY, Role VARCHAR(255))")
+            self.execute("CREATE TABLE mcd(EmailID VARCHAR(150) PRIMARY KEY, Role VARCHAR(255))")
             #Create Timesheet table
             #Timesheet refers to table Person(EmailID) as foreign key
-            self.execute("CREATE TABLE Timesheet(EmailID VARCHAR(150), Date DATE, start_time TIME, end_time TIME, " + 
+            self.execute("CREATE TABLE timesheet(EmailID VARCHAR(150), Date DATE, start_time TIME, end_time TIME, " + 
                                 "PRIMARY KEY (EmailID, Date, start_time, end_time))")
             #Create worker_update_request table
             self.execute("CREATE TABLE worker_update_request(valid VARCHAR(1), EmailID VARCHAR(150), Request_type VARCHAR(1), " 
@@ -101,13 +101,13 @@ class Database:
             self.execute("CREATE TABLE overtime_accepted(overtime_id INT, EmailID VARCHAR(150), " +
                 "PRIMARY KEY (overtime_id, EmailID))")
             #Create Bins table
-            self.execute("CREATE TABLE Bins(binID INT PRIMARY KEY, Name char(150), Longitude varchar(30), Latitude varchar(30))")
+            self.execute("CREATE TABLE bins(binID INT PRIMARY KEY, Name char(150), Longitude varchar(30), Latitude varchar(30))")
             #Create BaseDisplay table
-            self.execute("CREATE TABLE BaseDisplay(date DATE, binID INT, collectionTime TIME)")
+            self.execute("CREATE TABLE basedisplay(date DATE, binID INT, collectionTime TIME)")
             #Create Route table
-            self.execute("CREATE TABLE Route(Date DATE, EmailID VARCHAR(150), binID VARCHAR(255), sequence INT)")
+            self.execute("CREATE TABLE route(Date DATE, EmailID VARCHAR(150), binID VARCHAR(255), sequence INT, PRIMARY KEY (Date, binID, EmailID, Sequence))")
             #Create EdgeBetween2Bin
-            self.execute("CREATE TABLE EdgeBetween2Bin(binID1 INT, binID2 INT, DISTANCE FLOAT, PRIMARY KEY (binID1, binID2))")
+            self.execute("CREATE TABLE edgebetween2bin(binID1 INT, binID2 INT, DISTANCE FLOAT, PRIMARY KEY (binID1, binID2))")
             return True
         except mysql.connector.Error as err:
             print("Error in creating tables")
@@ -124,7 +124,7 @@ class Database:
         try:
             if w_add:
                 #Check if the worker is already present in Person table
-                self.execute("SELECT * FROM Person WHERE EmailID = %s", (w_email,))
+                self.execute("SELECT * FROM person WHERE EmailID = %s", (w_email,))
                 if self.cursor.fetchone():
                     self.error = "Worker/Manager already exists"
                     print("Worker already present in Person table")
@@ -142,7 +142,7 @@ class Database:
                     # set mgr_id2 = mgr_id and set valid to 0
                     #Then add the person to the persons table
                     self.execute("UPDATE worker_update_request SET approved_by_mg2 = %s, valid = 0 WHERE EmailID = %s", (mgr_email, w_email))
-                    self.execute("INSERT INTO Person VALUES (%s, %s, %s, %s)", (w_name, w_email, w_phone, w_role))
+                    self.execute("INSERT INTO person VALUES (%s, %s, %s, %s)", (w_name, w_email, w_phone, w_role))
                     self.cnx.commit()
                     self.error = None
                     return True
@@ -156,7 +156,7 @@ class Database:
                 
             else:
                 #Do similar steps as done for adding for removing a worker
-                self.execute("SELECT * FROM Person WHERE EmailID = %s", (w_email,))
+                self.execute("SELECT * FROM person WHERE EmailID = %s", (w_email,))
                 if not self.cursor.fetchone():
                     self.error = "Worker does not exist"
                     print("Worker not present in Person table")
@@ -190,13 +190,13 @@ class Database:
     def add_remove_mcd(self, email: str, role: str, add:bool) -> bool:
         if add:
             #Add the worker in MCD table
-            self.execute("INSERT INTO MCD VALUES(%s, %s)", (email, role))
+            self.execute("INSERT INTO mcd VALUES(%s, %s)", (email, role))
             self.cnx.commit()
             self.error = None
             return True
         else:
             #Remove the worker from MCD table
-            self.execute("DELETE FROM MCD WHERE EmailID = %s", (email,))
+            self.execute("DELETE FROM mcd WHERE EmailID = %s", (email,))
             self.cnx.commit()
             self.error = None
             return True
@@ -204,7 +204,7 @@ class Database:
     def remove_timesheet(self, email: str, date: str, start_time: str, end_time: str) -> bool:
         #Remove the timesheet of the worker
         date = datetime.strptime(date, "%d-%m-%Y").strftime("%Y-%m-%d")
-        self.execute("DELETE FROM Timesheet WHERE EmailID = %s AND date = %s AND start_time = %s AND end_time = %s", (email, date, start_time, end_time))
+        self.execute("DELETE FROM timesheet WHERE EmailID = %s AND date = %s AND start_time = %s AND end_time = %s", (email, date, start_time, end_time))
         self.cnx.commit()
         self.error = None
         return True
@@ -225,28 +225,28 @@ class Database:
         start_time = start_time + ":00"
         end_time = end_time + ":00"
         
-        self.execute("INSERT INTO Timesheet VALUES(%s, %s, %s, %s)", (email, date, start_time, end_time))
+        self.execute("INSERT INTO timesheet VALUES(%s, %s, %s, %s)", (email, date, start_time, end_time))
         self.cnx.commit()
         self.error = None
         return True
 
     #Check if worker exists in Person table and it's role is W
     def check_worker(self, email: str) -> bool:
-        self.execute("SELECT * FROM Person WHERE EmailID = %s AND role = 'W'", (email,))
+        self.execute("SELECT * FROM person WHERE EmailID = %s AND role = 'w'", (email,))
         if self.cursor.fetchone():
             return True
         return False
 
     #Check if manager exists in Person table and it's role is M
     def check_manager(self, email: str) -> bool:
-        self.execute("SELECT * FROM Person WHERE EmailID = %s AND role = 'M'", (email,))
+        self.execute("SELECT * FROM person WHERE EmailID = %s AND role = 'm'", (email,))
         if self.cursor.fetchone():
             return True
         return False
     
     #Check if person exist in person table
     def check_person(self, email: str) -> bool:
-        self.execute("SELECT * FROM Person WHERE EmailID = %s", (email,))
+        self.execute("SELECT * FROM person WHERE EmailID = %s", (email,))
         try:
             len(self.cursor.fetchone())
             return True
@@ -256,13 +256,13 @@ class Database:
    #Create overtime request
     def create_overtime_request(self, date: str, start_time: str, end_time: str, number_of_required_worker: str) -> bool:
         #Check if the request is already present in overtime_request table
-        self.execute("SELECT * FROM overtime_request WHERE Date = %s AND start_time = %s AND end_time = %s", (date, start_time, end_time))
+        self.execute("SELECT * FROM recieve_overtime WHERE Date = %s AND start_time = %s AND end_time = %s", (date, start_time, end_time))
         if self.cursor.fetchone():
             self.error = "Request already present"
-            print("Request already present in overtime_request table")
+            print("Request already present in recieve_overtime table")
             return False
         #Add the request in overtime_request table
-        self.execute("INSERT INTO overtime_request (valid, date, start_time, end_time, number_of_required_worker, accepted_till_now) VALUES(1, %s, %s, %s, %s, 0)", (date, start_time, end_time, number_of_required_worker))
+        self.execute("INSERT INTO recieve_overtime (valid, date, start_time, end_time, number_of_required_worker, accepted_till_now) VALUES(1, %s, %s, %s, %s, 0)", (date, start_time, end_time, number_of_required_worker))
         self.cnx.commit()
         self.error = None
         return True
@@ -271,7 +271,7 @@ class Database:
     def check_timesheet_clash(self, email: str, date: str, start_time: str, end_time: str) -> bool:
         #Change date format to "%d-%m-%y"
         #date = datetime.strptime(date, "%d-%m-%Y").strftime("%Y-%m-%d")
-        self.execute("SELECT * FROM Timesheet WHERE EmailID = %s AND Date = %s", (email, date))
+        self.execute("SELECT * FROM timesheet WHERE EmailID = %s AND Date = %s", (email, date))
 
         timesheet = self.cursor.fetchall()
         #convert start_time and end_time to datetime object
@@ -327,8 +327,23 @@ class Database:
         self.error = None
         return True
 
+    def get_overtime(self, date: str):
+        #date = datetime.strptime(date, "%d-%m-%Y").strftime("%Y-%m-%d")
+        self.execute("SELECT * FROM recieve_overtime WHERE Date = '"+ date + "' AND valid = 1", None)
+        return self.cursor.fetchall()
+
+    def update_overtime_request(self, date: str):
+        #date = datetime.strptime(date, "%d-%m-%Y").strftime("%Y-%m-%d")
+        #Get current workers
+        self.execute("SELECT accepted_till_now FROM recieve_overtime WHERE Date = '"+ date + "' AND valid = 1", None)
+        current_workers = self.cursor.fetchall()[0][0]
+
+        #Get required workers
+
+        self.cnx.commit()
+ 
     def get_information_all_workers(self):
-        self.execute("SELECT * FROM Person WHERE role = 'W'")
+        self.execute("SELECT * FROM person WHERE role = 'w'")
         details = self.cursor.fetchall()
         #Putting details into dictionary
         details_dict = {}
@@ -337,7 +352,7 @@ class Database:
         return details_dict
 
     def get_information_all_managers(self):
-        self.execute("SELECT * FROM Person WHERE role = 'M'")
+        self.execute("SELECT * FROM person WHERE role = 'm'")
         details = self.cursor.fetchall()
         #Putting details into dictionary
         details_dict = {}
@@ -355,7 +370,7 @@ class Database:
         return details_dict
 
     def get_information_all_timesheets(self):
-        self.execute("SELECT * FROM Timesheet")
+        self.execute("SELECT * FROM timesheet")
         details = self.cursor.fetchall()
         #Putting details into dictionary
         details_dict = {}
@@ -381,6 +396,9 @@ class Database:
             details_dict[i[0]] = i[1:]
         return details_dict
 
+    def get_bin_count(self) -> int:
+        return len(self.get_all_bins())
+
     def get_all_edges(self) -> list:
         self.execute("SELECT * FROM edges")
         details = self.cursor.fetchall()
@@ -389,9 +407,9 @@ class Database:
             details_list.append(i)
         return details_list
 
-    def insert_bin(self, binID: int, binName: str, lon="", lat=""):
+    def insert_bin(self, binID: int, binName: str, lat="", long=""):
         try:
-            self.execute("INSERT INTO bins VALUES(%s, %s, %s, %s)", (binID, binName, lon, lat))
+            self.execute("INSERT INTO bins VALUES(%s, %s, %s, %s)", (binID, binName, long, lat))
             self.cnx.commit()
             self.error = None
             return True
@@ -401,16 +419,20 @@ class Database:
             print(err)
             return False
     
-    def insert_edge(self, binID1: int, binID2: int, distance: int):
-        try:
-            self.execute("INSERT INTO EdgeBetween2Bin VALUES(%s, %s, %s)", (binID1, binID2, distance))
-            self.cnx.commit()
-            return True
-        except mysql.connector.Error as err:
-            self.error = "Error while inserting a new edge"
-            print("Something went wrong while inserting into EdgeBetween2Bin: {}".format(err))
-            print(err)
-            return False
+    def insert_route(self, date: str, w_email: str, route: list, afternoon: bool):
+        if not afternoon:
+            for index,binID in enumerate(route):
+                binID = int(binID)
+                if not self.execute("INSERT INTO route VALUES(%s, %s, %s, %s)", (date, w_email, binID, int(index))):
+                    return False
+        else:
+            for index,binID in enumerate(route):
+                binID = int(binID)
+                if not self.execute("INSERT INTO route VALUES(%s, %s, %s, %s)", (date, w_email, binID, int(-index-10))):
+                    return False
+        self.cnx.commit()
+        self.error = None
+        return True
     
     def get_all_routes(self) -> dict:
         self.execute("SELECT * FROM route")
@@ -421,21 +443,28 @@ class Database:
             details_list.append(i)
         return details_list
     
-    def get_route_for_wid(self, emailId: str)-> list:
+    def get_route_for_wid(self, emailId: str)-> dict:
         self.execute("SELECT * FROM route WHERE EmailID = %s", (emailId,))
         details = self.cursor.fetchall()
         details_list = {}
         for i in details:
-            details_list.append(i)
+            details_list[i[0]] = i[1:]
         return details_list
 
-    def get_route_for_wid_with_date(self, emailId: str, date: str) -> list:
-        self.execute("SELECT * FROM route WHERE EmailID = %s AND Date = %s", (emailId, date))
+    def get_route_for_wid_with_date_morning(self, emailId: str, date: str):
+        self.execute("SELECT * FROM route WHERE EmailID = %s AND Date = %s and Sequence>=0 ORDER BY Sequence", (emailId, date))
         details = self.cursor.fetchall()
-        details_list = {}
-        for i in details:
-            details_list.append(i)
-        return details_list
+        return details
+
+    def get_route_for_wid_with_date_afternoon(self, emailId: str, date: str):
+        self.execute("SELECT * FROM route WHERE EmailID = %s AND Date = %s and Sequence<0 ORDER BY Sequence DESC", (emailId, date))
+        details = self.cursor.fetchall()
+        return details
+
+    def get_bin_details(self, binID: int) -> str:
+        self.execute("SELECT * FROM bins WHERE BinID = %s", (binID,))
+        details = self.cursor.fetchall()
+        return details[0]
     
     def get_route_for_date(self, date: str) -> list:
         self.execute("SELECT * FROM route WHERE Date = %s", (date,))
@@ -448,19 +477,19 @@ class Database:
 
     #Get all details for email from Person table
     def get_details_for_email(self, email: str) -> list:
-        self.execute("SELECT * FROM Person WHERE EmailID = %s", (email,))
+        self.execute("SELECT * FROM person WHERE EmailID = %s", (email,))
         details = self.cursor.fetchall()
         return details
 
     #Get person name for email from Person table
     def get_name(self, email: str) -> str:
-        self.execute("SELECT * FROM Person WHERE EmailID = %s", (email,))
+        self.execute("SELECT * FROM person WHERE EmailID = %s", (email,))
         details = self.cursor.fetchall()
         return details[0][0]
 
     #Get person role for email from Person table
     def get_role(self, email: str):
-        self.execute("SELECT * FROM Person WHERE EmailID = %s", (email,))
+        self.execute("SELECT * FROM person WHERE EmailID = %s", (email,))
         details = self.cursor.fetchall()
         try:    
             return details[0][3]
@@ -469,14 +498,14 @@ class Database:
 
     #Get person phone number for email from Person table
     def get_phone(self, email: str) -> str:
-        self.execute("SELECT * FROM Person WHERE EmailID = %s", (email,))
+        self.execute("SELECT * FROM person WHERE EmailID = %s", (email,))
         details = self.cursor.fetchall()
         return details[0][2]
 
     #Update details in Person table
     def update_details(self, email: str, name: str, phone: str) -> bool:
         try:
-            self.execute("UPDATE Person SET Name = %s, Phone_number = %s WHERE EmailID = %s", (name, phone, email))
+            self.execute("UPDATE person SET Name = %s, Phone_number = %s WHERE EmailID = %s", (name, phone, email))
             self.cnx.commit()
             self.error = None
             return True
@@ -487,7 +516,7 @@ class Database:
 
     #Get all details for email from Timesheet table
     def get_timesheet_for_email(self, email: str) -> list:
-        self.execute("SELECT * FROM Timesheet WHERE EmailID = %s", (email,))
+        self.execute("SELECT * FROM timesheet WHERE EmailID = %s", (email,))
         details = self.cursor.fetchall()
         details_list = []
         for i in details:
@@ -529,3 +558,38 @@ class Database:
         for i in details:
             details_list.append(i)
         return details_list
+
+    #Get longitude and latitude for binID from Bin table
+    def get_bin_lat_long(self, binID: int) -> tuple:
+        self.execute("SELECT * FROM bins WHERE BinID = %s", (binID,))
+        details = self.cursor.fetchall()
+        return details[0][2], details[0][3]
+
+    #Insert distance between 2 bins into EdgeBetween2Bin table
+    def insert_distance_between_2_bins(self, bin1: int, bin2: int, distance: float) -> bool:
+        try:
+            self.execute("INSERT INTO EdgeBetween2Bin VALUES (%s, %s, %s)", (bin1, bin2, distance))
+            self.cnx.commit()
+            self.error = None
+            return True
+        except Exception as e:
+            self.error = "Error while inserting a new edge"
+            print(e)
+            return False
+
+    #Get distance between two bin
+    def get_distance_between_2_bins(self, bin1: int, bin2: int) -> float:
+        self.execute("SELECT * FROM EdgeBetween2Bin WHERE BinID1 = %s AND BinID2 = %s", (bin1, bin2))
+        details = self.cursor.fetchall()
+        return details[0][2]
+
+    def update_overtime(self, date, sign):
+        print(date)
+        self.execute("SELECT * FROM recieve_overtime WHERE Date = '"+ date + "' AND valid = 1", None)
+        details = self.cursor.fetchall()
+        if sign=="add":
+            x = details[0][6] + 1
+        else:
+            x = details[0][6] - 1
+        self.execute("UPDATE recieve_overtime SET accepted_till_now = %s WHERE date = %s", (x, date))
+        self.cnx.commit()

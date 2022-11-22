@@ -27,6 +27,28 @@
             $(":checkbox").on("click", false);
         });
     </script>
+
+    <style>
+        .worker_row {
+            cursor: pointer;
+            display: none;
+        }
+    </style>
+    
+    <script>
+        //show_workers function
+        function show_workers() {
+            const collection = document.getElementsByClassName("worker_row");
+            for (let i = 0; i < collection.length; i++) {
+                if (collection[i].style.display === "none") {
+                collection[i].style.display = "table-row";
+                } else {
+                collection[i].style.display = "none";
+                }
+            }   
+        }
+    </script>
+
     </head>
     <body>
         <!-- Navbar -->
@@ -47,7 +69,7 @@
                         <li class="nav-item">
                             <a class="nav-link" id = "dashboard" href="{{ url_for('index') }}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
                         </li>
-                        {% if user.get_role() == 'M' %}
+                        {% if user.get_role() == 'm' %}
                             <li class="nav-item active">
                                 <a class="nav-link" id = "route" href="{{ url_for('route_planning')}}"><i class="fa fa-truck"></i>Route Planning</a>
                             </li>
@@ -106,8 +128,6 @@
                         </h3>
                     </div>
                     <div class="card-body">
-                        <form action="{{ url_for('worker_timesheet') }}" method="POST">
-                            
                             <table class="table table-bordered">
                                 <thead class="thead-dark">
                                     <tr>
@@ -128,30 +148,37 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for (worker_name,worker_email), dates_morning, dates_afternoon in workers_timesheet %}
+                                    <!-- Create a button which when clicked will set worker_row display as inline-->
                                     <tr>
-                                        <td style="border-bottom: none;" colspan="8" scope="col">{{ loop.index }}. Name: <b>{{ worker_name }}</b>, Email: <b>{{ worker_email }}</b></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Morning Shift:</td>
-                                        {% for day, working in dates_morning %}
-                                        <td class="text-center" scope="col">
-                                            {% if working %} <i class="fa fa-check" style="color: green;"></i> {% endif %}
+                                        <td colspan="8" scope="col" scope="col">
+                                            <button type="button" class="btn btn-secondary btn-block" onclick="show_workers()">Show Workers</button>
                                         </td>
-                                        {% endfor %}
                                     </tr>
-                                    <tr>
-                                        <td>Afternoon Shift:</td>
-                                        {% for day, working in dates_afternoon %}
-                                        <td class="text-center" scope="col">
-                                            {% if working %} <i class="fa fa-check" style="color: green;"></i> {% endif %}
-                                        </td>
-                                        {% endfor %}
-                                    </tr>
-                                    {% endfor %}
                                     
+                                    {% for (worker_name,worker_email), dates_morning, dates_afternoon in workers_timesheet %}
+                                        <tr class="worker_row">
+                                            <td style="border-bottom: none;" colspan="8" scope="col">{{ loop.index }}. Name: <b>{{ worker_name }}</b>, Email: <b>{{ worker_email }}</b></td>
+                                        </tr>
+                                        <tr class="worker_row">
+                                            <td>Morning Shift:</td>
+                                            {% for day, working in dates_morning %}
+                                            <td class="text-center" scope="col">
+                                                {% if working %} <i class="fa fa-check" style="color: green;"></i> {% endif %}
+                                            </td>
+                                            {% endfor %}
+                                        </tr>
+                                        <tr class="worker_row">
+                                            <td>Afternoon Shift:</td>
+                                            {% for day, working in dates_afternoon %}
+                                            <td class="text-center" scope="col">
+                                                {% if working %} <i class="fa fa-check" style="color: green;"></i> {% endif %}
+                                            </td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                     
                                     <tr>
-                                        <td colspan="8" scope="col">&nbsp;</td>
+                                        <td colspan="8" scope="col">Summary:</td>
                                     </tr>
                                     <tr>
                                         <td scope="col" scope="col">Total Morning: </td>
@@ -161,113 +188,67 @@
                                         </td>
                                         {% endfor %}
                                     </tr>
-                                    <tr>
-                                        <td scope="col" scope="col">Total Afternoon: </td>
-                                        {% for total_date in total_worker_afternoon %}
-                                        <td scope="col" class="text-center" {% if total_date==0 %} style="color:black; background-color:red" {% endif %} scope="col">
-                                            {% if total_date!=0 %} {{ total_date }} {% else %} NO WORKER PRESENT {% endif %}
-                                        </td>
-                                        {% endfor %}
-                                    </tr>
-                                    <tr>
-                                        <td colspan="8" scope="col" scope="col">
-                                            <button type="submit" class="btn btn-danger btn-block" disabled>Raise overtime request</button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="8" scope="col">
-                                            <button type="submit" class="btn btn-success btn-block" disabled>Generate Route for next week</button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            
-                            <!--
-                            <div class="container">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="">
-                                            
-                                            <div class="container border-bottom">
-                                                <div class="row" style="background-color:#343a40;font-weight: bold;color: rgb(255, 255, 255);padding: 5px;">
-                                                    <div class="col">Day</div>
-                                                    <div class="col">Monday</div>
-                                                    <div class="col">Tuesday</div>
-                                                    <div class="col">Wednesday</div>
-                                                    <div class="col">Thursday</div>
-                                                    <div class="col">Friday</div>
-                                                    <div class="col">Saturday</div>
-                                                    <div class="col">Sunday</div>
-                                                </div>
-
-                                                <div class="row" style="background-color:#343a40;font-weight: bold;color: rgb(255, 255, 255);
-                                                padding: 5px;
-                                                    ">
-                                                    <div class="col">Email \ Dates</div>
-                                                    {% for date in dates%}
-                                                    <div class="col" class="text-center">{{ date }}</div>
-                                                    {% endfor %}
-                                                </div>
-                                                <br>
-                                                {% for (worker_name,worker_email), dates_morning, dates_afternoon in workers_timesheet %}
-                                                    
-                                                        <div class="row " style="padding: 5px;">
-                                                            <p>Name: <b> {{ worker_name }}</b>, Email: <b> {{ worker_email }}</b></p>
-                                                        </div>
-                                                        <div class="row" style="padding: 5px;">
-                                                            <div class="col" style="padding: 5px;">Morning Shift:</div>
-                                                            {% for day, working in dates_morning %}
-                                                            <div class="col text-center border" style="padding: 5px;">
-                                                                <input type="checkbox" name="working" value="{{ day }}_morning"{% if working %} checked {% endif %}>
-                                                            </div>
-                                                            {% endfor %}
-                                                        </div>
-                                                        <div class="row" style="padding: 5px;">
-                                                            <div class="col" style="padding: 5px;">Afternoon Shift:</div>
-                                                            {% for day, working in dates_afternoon %}
-                                                            <div class="col text-center border" style="padding: 5px;">
-                                                                <input type="checkbox" name="working" value="{{ day }}_afternoon"{% if working %} checked {% endif %}>
-                                                            </div>
-                                                            {% endfor %}
-                                                        </div>
-                                                    
-                                                    <br>
+                                    
+                                    {% if is_weekday!=True %}
+                                        <tr>
+                                            <td scope="col" scope="col">Total Afternoon (Overtime): </td>
+                                            {% if is_sunday == True %}
+                                                {% for total_date in total_worker_afternoon %}
+                                                <td scope="col" class="text-center" {% if total_date==0 %} style="color:black; background-color:red" {% endif %} scope="col">
+                                                    {% if total_date!=0 %} {{ total_date }} {% else %} NO WORKER PRESENT {% endif %}
+                                                </td>
                                                 {% endfor %}
+                                            {% else %} 
+                                                {% for split, data in overtime_data %}
+                                                <td scope="col" class="text-center" style="color:black; background-color:">
+                                                    {% if split==False %}
+                                                        <p>{{ data }}</p>
+                                                    {% else %}
+                                                        <p style="color:green;"> {{ data[0] }}</p>
+                                                        <p style="color:blue;">{{ data[1] }}</p>
+                                                    {% endif %}
+                                                </td>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </tr>
+                                    {% endif %}
+                                    <tr>
+                                            <td colspan="8" scope="col" scope="col">
+                                                {% if overtime_already_generated==False %}
+                                                    <button type="submit" class="btn btn-danger btn-block" 
+                                                    {% if valid_overtime_request_raise_manager!=True %}
+                                                    disabled 
+                                                    {% endif %}
+                                                    value="raise_overtime_request">
+                                                    <a href="{{ url_for('generate_overtime') }} " style="color: white;">Raise overtime request</a>
+                                                    </button>
+                                                {% else %}
+                                                    <button type="submit" class="btn btn-danger btn-block" value="raise_overtime_request">
+                                                    Overtime already raised!!
+                                                    </button>
+                                                {% endif %}
 
-                                                <div class="row" style="padding: 5px;">
-                                                    <div class="col" style="padding: 5px;">Total Morning: </div>
-                                                    {% for total_date in total_worker_morning %}
-                                                    <div class="col text-center border" style="padding: 5px; {% if total_date==0 %}color:black; background-color:red {% endif %}">
-                                                        {% if total_date!=0 %} {{ total_date }} {% else %} NONE {% endif %}
-                                                    </div>
-                                                    {% endfor %}
-                                                </div>
-                                                <div class="row" style="padding: 5px;">
-                                                    <div class="col" style="padding: 5px;">Total Afternoon: </div>
-                                                    {% for total_date in total_worker_afternoon %}
-                                                    <div class="col text-center border" style="padding: 5px; {% if total_date==0 %}color:black; background-color:red {% endif %}">
-                                                        {% if total_date!=0 %} {{ total_date }} {% else %} NONE {% endif %}
-                                                    </div>
-                                                    {% endfor %}
-                                                </div>
-
-                                                <div class="row" style="padding: 5px;">
-                                                    <div class="col" style="padding: 5px;">
-                                                        <button type="submit" class="btn btn-danger btn-block" disabled>Raise overtime request</button>
-                                                    </div>
-                                                </div>
-                                                <div class="row" style="padding: 5px;">
-                                                    <div class="cow" style="padding: 5px;">
-                                                        <button style="width: 100%;" type="submit" class="btn btn-success btn-block" disabled>Generate Route for next week</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            -->
-                        </form>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="8" scope="col">
+                                                {% if paths_generated!=True %}
+                                                    <button type="submit" class="btn btn-success btn-block" 
+                                                    {% if is_sunday==False %}
+                                                        disabled 
+                                                    {% endif %}
+                                                    value = "generate_route">
+                                                    <a href="{{ url_for('generate_path') }} " style="color: white;">Generate Route for next week</a>
+                                                    </button>
+                                                {% else %}
+                                                    <button type="submit" class="btn btn-success btn-block">
+                                                        Next week path generated!!
+                                                    </button>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                </tbody>
+                            </table>  
                     </div>
                 </div>
             </div>
@@ -275,18 +256,6 @@
     </div>
 
     <!-- Content -->
-
-
-    
-
-
-
-    
-    {% if alert %}
-    <script>
-    alert("{{ alert_message }}");
-    </script>
-    {% endif %}
     </body>
 
 </html>
