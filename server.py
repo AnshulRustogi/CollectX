@@ -48,9 +48,9 @@ if datetime.datetime.today().weekday() <= 5:
     is_weekday = False
 '''
 
-is_weekday = datetime.datetime.today().weekday() <= 5
-is_sunday = datetime.datetime.today().weekday() == 5
-is_saturday = not is_weekday and not is_sunday  
+is_weekday = datetime.datetime.today().weekday() <= 4
+is_sunday = datetime.datetime.today().weekday() == 6
+is_saturday = not is_weekday and not is_sunday
 t = 17
 valid_overtime_request_raise_manager = (datetime.datetime.now().hour < t) and is_saturday
 valid_overtime_request_accept_worker = is_saturday and not valid_overtime_request_raise_manager 
