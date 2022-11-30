@@ -91,7 +91,6 @@ class User:
 app = Flask("CollectX")  #naming our application
 assets     = Environment(app)
 assets.url = app.static_url_path
-
 scss       = Bundle('css/form.scss', filters='pyscss', output='css/profile_form.css')
 
 assets.config['SECRET_KEY'] = 'SDL-CollectX'
@@ -106,8 +105,7 @@ assets.register('scss_all', scss)
 app.secret_key = "SDL-CollectX"  #it is necessary to set a password when dealing with OAuth 2.0
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  #this is to set our environment to https because OAuth 2.0 only supports https environments
 
-
-GOOGLE_CLIENT_ID = "404997951228-bm3hrsq5dudpdkgkdicl3kh2hvtev8g1.apps.googleusercontent.com"  #enter your client id you got from Google console
+GOOGLE_CLIENT_ID = "ENTER_DETAILS_KEY"  #enter your client id you got from Google console
 client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secret.json")  #set the path to where the .json file you got Google console is
 
 flow = Flow.from_client_secrets_file(  #Flow is OAuth 2.0 a class that stores all the information on how we want to authorize our users
