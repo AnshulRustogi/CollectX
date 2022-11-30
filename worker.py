@@ -302,7 +302,6 @@ class Manager(Person):
             i_bin_long, i_bin_lat = float(i_bin_long), float(i_bin_lat)
             #get distance between bin
             distance = client.distance_matrix(locations=((bin_long, bin_lat), (i_bin_long, i_bin_lat)), profile="driving-car", metrics=['distance'])
-            print(distance)
             #insert into database
             self.db.insert_distance_between_2_bins(bin_id, i, distance['distances'][0][1]/1000)
             self.db.insert_distance_between_2_bins(i, bin_id, distance['distances'][1][0]/1000)

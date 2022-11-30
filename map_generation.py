@@ -3,35 +3,9 @@ import json
 from db import Database
 import numpy as np
 import datetime
-#Coordinates of India Gate in lon,lat
-#coordinates = ((77.2295, 28.6129),(77.2090, 28.6448))
-#Coordinates of IGI Airport in lon,lat
-#coordinates = ((77.0485, 28.5665),(77.2090, 28.6448))
-
-#How many km between India Gate and IGI Airport
-#Number of km between India Gate and IGI Airport is 14.5 km
-
-#Use python to calculate the driving distance between India Gate and IGI Airport
 
 db = Database()
 city_average_speed = 20
-'''
-distance = client.distance_matrix(coords, profile='driving-car', metrics=['distance'])
-print(distance)
-
-res = client.directions(coords)
-geometry = client.directions(coords)['routes'][0]['geometry']
-decoded = convert.decode_polyline(geometry)
-
-distance_txt = "<h4> <b>Distance :&nbsp" + "<strong>"+str(round(res['routes'][0]['summary']['distance']/1000,1))+" Km </strong>" +"</h4></b>"
-duration_txt = "<h4> <b>Duration :&nbsp" + "<strong>"+str(round(res['routes'][0]['summary']['duration']/60,1))+" Mins. </strong>" +"</h4></b>"
-
-m = folium.Map(location=[6.074834613830474, 80.25749815575348],zoom_start=10, control_scale=True,tiles="cartodbpositron")
-folium.GeoJson(decoded).add_child(folium.Popup(distance_txt+duration_txt,max_width=300)).add_to(m)
-'''
-#Create a folium map with the coordinates of delhi as the center and the zoom should cover entire delhi city
-
-
 def create_map(date):
     #Create distance matrix
     size = db.get_bin_count()
