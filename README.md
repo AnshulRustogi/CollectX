@@ -9,6 +9,10 @@
   ```
   insert into person values (FULL_NAME, GOOGLE_EMAIL_ID, PHONE_NUMBER, 'm')
   ```
+5) Generate key from openrouteserivce for using their distance matrix in order to calculate distances, save the key in a new file
+  ```
+  echo "KEY_FROM_OPENROUTESERVICE" > key
+  ```
 5) Create a new virtual environment and install the required libraries
   ```
   pip install -r requirements.txt
